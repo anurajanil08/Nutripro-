@@ -1,0 +1,130 @@
+{% extends 'adminside/base.html' %}
+
+{% block title %}Add Images for {{ product.product_name }}{% endblock %}
+
+{% block content %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.6/cropper.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.6/cropper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<div class="container mt-5">
+    <h1>Add Images for {{ product.product_name }}</h1>
+    
+    <form method="post" enctype="multipart/form-data" id="product-image-form">
+        {% csrf_token %}
+        
+        <!-- Thumbnail Upload -->
+        <div class="mb-3">
+            <label for="thumbnail" class="form-label">Thumbnail</label>
+            <input type="file" class="form-control" id="thumbnail" name="thumbnail" accept="image/*">
+            <div id="thumbnailPreview" class="mt-2"></div>
+        </div>
+
+        <!-- Product Images Upload -->
+        <div class="mb-3">
+            <label for="images" class="form-label">Product Images</label>
+            <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple>
+            <div id="imagesPreview" class="mt-2"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload Images</button>
+    </form>
+
+    <!-- Cropping Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crop Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="imageToCrop" src="" alt="Image to crop" style="max-width: 100%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="cropButton">Crop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const thumbnailInput = document.getElementById('thumbnail');
+    const imagesInput = document.getElementById('images');
+    const thumbnailPreview = document.getElementById('thumbnailPreview');
+    const imagesPreview = document.getElementById('imagesPreview');
+    const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropButton = document.getElementById('cropButton');
+
+    let cropper;
+    let currentImage;
+    let isThumbail = false;
+
+    function handleFileSelect(event, previewElement, isThumbnail = false) {
+        const files = event.target.files;
+        previewElement.innerHTML = '';
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '200px';
+                img.style.cursor = 'pointer';
+                img.classList.add('m-2');
+                img.onclick = function() {
+                    currentImage = img;
+                    isThumbail = isThumbnail;
+                    imageToCrop.src = img.src;
+                    cropModal.show();
+                };
+                previewElement.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+
+    thumbnailInput.addEventListener('change', (event) => handleFileSelect(event, thumbnailPreview, true));
+    imagesInput.addEventListener('change', (event) => handleFileSelect(event, imagesPreview));
+
+    document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+        cropper = new Cropper(imageToCrop, {
+            aspectRatio: isThumbail ? 1 : NaN,
+            viewMode: 1,
+        });
+    });
+
+    document.getElementById('cropModal').addEventListener('hidden.bs.modal', function () {
+        cropper.destroy();
+    });
+
+    cropButton.addEventListener('click', function() {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        currentImage.src = croppedCanvas.toDataURL();
+        
+        croppedCanvas.toBlob(function(blob) {
+            const file = new File([blob], isThumbail ? 'thumbnail.jpg' : 'product_image.jpg', { type: 'image/jpeg' });
+            
+            if (isThumbail) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                thumbnailInput.files = dataTransfer.files;
+            } else {
+                const dataTransfer = new DataTransfer();
+                Array.from(imagesInput.files).forEach(f => dataTransfer.items.add(f));
+                dataTransfer.items.add(file);
+                imagesInput.files = dataTransfer.files;
+            }
+        });
+
+        cropModal.hide();
+    });
+});
+</script> {% endcomment %}
+{% endblock %}

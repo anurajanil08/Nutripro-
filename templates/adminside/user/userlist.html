@@ -1,0 +1,85 @@
+{% extends 'adminside/base.html' %}
+
+{% block title %}
+<a class="navbar-brand" href="">User Management</a>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="header">
+                    <p class="category">Manage and edit user details</p>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Date Joined</th>
+                                <th>Status</th>
+                                <th>Action</th> <!-- Action column with form -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.date_joined }}</td>
+                                <td>
+                                    {% if user.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form id="toggle-form-{{ user.id }}" action="{% url 'adminpanel:toggle_user_active' user.id %}" method="post">
+                                        {% csrf_token %}
+                                        <!-- Button to trigger SweetAlert confirmation -->
+                                        {% if user.is_active %}
+                                            <button type="button" class="btn btn-warning btn-sm" onclick="confirmToggle({{ user.id }}, 'deactivate')">Deactivate</button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-success btn-sm" onclick="confirmToggle({{ user.id }}, 'activate')">Activate</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// Function to confirm activation or deactivation with SweetAlert
+function confirmToggle(userId, action) {
+    let actionText = action === 'deactivate' ? 'deactivate this user' : 'activate this user';
+    let confirmButtonText = action === 'deactivate' ? 'Yes, deactivate!' : 'Yes, activate!';
+
+    Swal.fire({
+        title: `Are you sure you want to ${actionText}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: confirmButtonText
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit the form if confirmed
+            document.getElementById('toggle-form-' + userId).submit();
+        }
+    })
+}
+</script>
+{% endblock content %}
+

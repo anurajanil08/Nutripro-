@@ -1,0 +1,63 @@
+{% extends 'adminside/base.html' %}
+
+{% block title %}
+<a class="navbar-brand" href="#">Brand Management</a>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="header">
+                    <p class="category">Manage and edit brand details</p>
+                </div>
+                <div class="content table-responsive table-full-width">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Brand Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for brand in brands %}
+                            <tr>
+                                <td>{{ brand.brand_name }}</td>
+                                <td>
+                                    <!-- Toggle button for status -->
+                                    <form id="toggle-form-{{ brand.id }}" action="{% url 'brand:toggle_brand' brand.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn {{ brand.status|yesno:'btn-success,btn-danger' }}" onclick="confirmToggle({{ brand.id }})">
+                                            {{ brand.status|yesno:'Active,Inactive' }}
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 10px;">
+                                        <!-- Edit button -->
+                                        <form  action="{% url 'brand:editbrand' brand.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-info btn-sm" >Edit</button>
+                                        </form>
+
+                                        <form action="{% url 'brand:deletebrand' brand.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'brand:createbrand' %}" class="btn btn-primary">Add New Brand</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

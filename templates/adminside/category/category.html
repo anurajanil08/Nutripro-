@@ -1,0 +1,52 @@
+{% extends 'adminside/base.html' %}
+
+{% block title %}
+<a class="navbar-brand" href="#">Create Category</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Create a New Category</h2>
+    
+    <!-- Display validation errors -->
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <!-- Category Form -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="category_name">Category Name</label>
+            <input type="text" name="category_name" id="category_name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="custom-form-group">
+            <div class="custom-checkbox">
+                <input type="checkbox" name="is_active" id="is_active" class="form-check-input"> 
+                <label for="is_active" class="custom-check-label">Active</label>
+            </div>
+        </div>
+        
+        
+        <button type="submit" class="btn btn-primary">Create Category</button>
+    </form>
+</div>
+{% endblock content %}
+
+    
+

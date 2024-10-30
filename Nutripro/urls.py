@@ -16,9 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
+    path('auth/', include('nutri_auth.urls')),
     path('',include("accounts.urls")),
-    path('auth/',include("nutri_auth.urls"))
-]
+    path('adminpanel/',include("adminpanel.urls")),
+    path('brand/',include("brand.urls")),
+    path('product/',include("product.urls")),
+    path('category/',include("category.urls")),
+    
+
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

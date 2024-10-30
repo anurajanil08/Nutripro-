@@ -1,0 +1,41 @@
+# Ignore the virtual environment directory
+djvenv/
+
+# Ignore Python bytecode files
+*.py[cod]
+__pycache__/
+
+# Ignore Django migrations
+**/migrations/*
+!**/migrations/__init__.py
+
+# Ignore database files
+*.sqlite3
+
+# Ignore environment variables file
+.env
+
+# Ignore logs
+*.log
+
+
+# Ignore IDE and editor-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore test coverage files
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Ignore pytest cache
+.pytest_cache/

@@ -1,0 +1,11 @@
+{% extends 'adminside/base.html' %}
+{% block title %}
+<h1>Create Brand</h1>
+{% endblock %}
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock content %}

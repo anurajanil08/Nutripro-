@@ -1,15 +1,18 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout 
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
-from .models import User
-from django.conf import settings
-import random
-from django.shortcuts import render, redirect
-from django.core.mail import send_mail
+from django.contrib import messages
 from django.conf import settings
 from .forms import UserCreationForm
+from .forms import LoginForm
+from .models import User
+import random
+from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
+
+
 
 
 
@@ -31,12 +34,14 @@ def signup(request):
             password = form.cleaned_data.get('password1')
 
             otp = generate_otp()
+            print(otp)
 
             request.session['temp_user_data'] = {
                 'email': email,
                 'username': username,
                 'password': password,
-                'otp': otp
+                'otp': otp,
+                'otp_generated_time': timezone.now().isoformat()
             }
 
             try:
@@ -52,7 +57,8 @@ def signup(request):
                 return render(request, 'authentication/signup.html', {'form': form})
 
 
-            return redirect('verify_otp')  
+            return redirect('nutri_auth:verify-otp')  
+        
 
     else:
         form = UserCreationForm()
@@ -66,41 +72,93 @@ def verify_otp(request):
         entered_otp = request.POST.get('otp')
         temp_user_data = request.session.get('temp_user_data')
 
-        if temp_user_data and entered_otp == temp_user_data['otp']:
-            user = User(
-                email=temp_user_data['email'],
-                username=temp_user_data['username'],
-                is_active=True
-            )
-            user.set_password(temp_user_data['password'])
-            user.save()
+        if temp_user_data:
+            otp_generated_time = timezone.datetime.fromisoformat(temp_user_data['otp_generated_time'])
+            current_time = timezone.now()
 
-            del request.session['temp_user_data']
+            if current_time > otp_generated_time + timedelta(minutes=2):
+                return render(request, 'authentication/otp.html', {
+                    'error': 'OTP has expired. Please request a new one.',
+                })
 
-            login(request, user)
+            if entered_otp == temp_user_data['otp']:
+                user = User(
+                    email=temp_user_data['email'],
+                    username=temp_user_data['username'],
+                    is_active=True
+                )
+                user.set_password(temp_user_data['password'])
+                user.save()
 
-            return redirect('index')  
+                del request.session['temp_user_data']
+                login(request, user)
 
-        else:
-            return render(request, 'authentication/verify_otp.html', {
+                return redirect('accounts:index')
+
+            return render(request, 'authentication/otp.html', {
                 'error': 'Invalid OTP. Please try again.',
             })
 
-    return render(request, 'authentication/verify_otp.html')
+    return render(request, 'authentication/otp.html')
 
+
+def resend_otp(request):
+    temp_user_data = request.session.get('temp_user_data')
+    
+    if temp_user_data:
+        new_otp = generate_otp()
+        print(new_otp)
+        temp_user_data['otp'] = new_otp
+        temp_user_data['otp_generated_time'] = timezone.now().isoformat()
+        request.session['temp_user_data'] = temp_user_data 
+
+        try:
+            send_mail(
+                'Your New OTP Code',
+                f'Your new OTP for account verification is {new_otp}.',
+                settings.DEFAULT_FROM_EMAIL,
+                [temp_user_data['email']],
+                fail_silently=False,
+            )
+        except Exception as e:
+            return render(request, 'authentication/otp.html', {
+                'error': 'Failed to resend OTP. Please try again later.',
+            })
+
+        return render(request, 'authentication/otp.html', {
+            'message': 'A new OTP has been sent to your email.'
+        })
+
+    return redirect('nutri_auth:signup')
 
 
 
 def handlelogin(request):
-  return render(request,"authentication/login.html")  
 
-
-
-def otp(request):
     if request.method == 'POST':
-        otp_value = request.POST.get('otp')
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
 
-    return render(request,"authentication/otp.html")  
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('accounts:index')  
+            else:
+                messages.error(request, "Invalid email or password.")
+    else:
+        form = LoginForm()
 
-def handlelogout(request):
-  return redirect(request,'/auth/login') 
+
+    return render(request, "authentication/login.html", {'form': form})
+
+
+
+def logout_view(request):
+
+    logout(request)
+    
+    return redirect('nutri_auth:handlelogin') 
+
+

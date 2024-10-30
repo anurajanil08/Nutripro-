@@ -1,0 +1,54 @@
+{% extends 'adminside/base.html' %}
+
+{% block title %}
+<a class="navbar-brand" href="#">Edit Category</a>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Edit Category: <strong>{{ category.category_name }}</strong></h1>
+
+    <!-- Form to edit category -->
+    <form method="POST" class="mt-4 shadow p-4 bg-white rounded">
+        {% csrf_token %}
+        <div class="form-group mb-4">
+            <!-- Use Bootstrap form styling -->
+            {{ form.as_p }}
+        </div>
+
+        <div class="text-center">
+            <!-- Save Changes button -->
+            <button type="submit" class="btn btn-success btn-lg">Save Changes</button>
+            <a href="{% url 'category:listcategory' %}" class="btn btn-secondary btn-lg ms-3">Back to Category List</a>
+        </div>
+    </form>
+</div>
+
+<!-- Optional: Add custom CSS for additional styling -->
+<style>
+    body {
+        background-color: #f8f9fa; /* Light background color */
+    }
+    h1 {
+        color: #343a40; /* Darker color for the header */
+    }
+    .form-group input,
+    .form-group textarea {
+        border-radius: 0.25rem; /* Rounded corners for inputs */
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for inputs */
+    }
+    .btn {
+        padding: 0.5rem 1.5rem; /* Padding for buttons */
+        border-radius: 0.25rem; /* Rounded corners for buttons */
+    }
+    .shadow {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Card shadow for form */
+    }
+    .bg-white {
+        background-color: #ffffff; /* White background for form */
+    }
+    .rounded {
+        border-radius: 0.5rem; /* Rounded corners for the form */
+    }
+</style>
+{% endblock %}

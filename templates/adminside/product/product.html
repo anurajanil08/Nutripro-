@@ -1,0 +1,69 @@
+{% extends 'adminside/base.html' %}
+{% block title %} 
+    <title>Product Management</title>
+{% endblock title %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="content-title card-title mb-0">Product Management</h2>
+            <!-- Link to create a new product -->
+            <a href="{% url 'product:addproduct' %}" class="btn btn-primary">
+                <i class="text-muted material-icons md-post_add"></i> Create Product
+            </a> 
+        </div>
+    </div>
+
+    <!-- Table to display product details -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <!-- Product Thumbnail -->
+                    <td>
+                        {% if product.thumbnail %}
+                        <img src="{{ product.thumbnail.url }}" class="img-fluid rounded" style="width: 50px; height: auto;" alt="{{ product.Product_name }}">
+                        {% endif %}
+                    </td>
+
+                    <!-- Product Name -->
+                    <td>{{ product.Product_name }}</td>
+
+                    <!-- Product Category -->
+                    <td>{% if product.Product_category %}{{  product.Product_category.category_name }}{% else %}No category{% endif %}</td>
+
+                    <!-- Product Brand -->
+                    <td>{% if product.Product_brand %}{{ product.Product_brand.brand_name }}{% else %}No brand{% endif %}</td>
+
+                    <!-- Product Status (Active/Inactive) -->
+                    <td>
+                        <span class="badge rounded-pill {% if product.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ product.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </td>
+
+                    <!-- Action Buttons -->
+                    <td>
+                        <a href="{% url 'product:product-detail' product.id %}" class="btn btn-warning me-2">More</a>
+                    </td> 
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</section>
+{% endblock content %}

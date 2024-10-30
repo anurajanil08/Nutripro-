@@ -1,0 +1,117 @@
+{% extends "adminside/base.html" %}
+{% load static %}
+{% block title %}
+<title>Edit Product</title>
+{% endblock title %}
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Edit Product</h2>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Display any form errors -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Product Name -->
+                <div class="mb-3">
+                    <label for="product_name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="product_name" name="product_name" value="{{ products.product_name }}" required>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="category" name="product_category" class="form-control">
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id == products.product_category.id %}selected{% endif %}>{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Brand -->
+                <div class="mb-3">
+                    <label for="brand" class="form-label">Brand</label>
+                    <select id="brand" name="product_brand" class="form-control">
+                        {% for brand in brands %}
+                        <option value="{{ brand.id }}" {% if brand.id == products.product_brand.id %}selected{% endif %}>{{ brand.brand_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price</label>
+                    <input type="number" class="form-control" id="price" name="price" value="{{ products.price }}" required>
+                </div>
+
+                <!-- Offer Price -->
+                <div class="mb-3">
+                    <label for="offer_price" class="form-label">Offer Price</label>
+                    <input type="number" class="form-control" id="offer_price" name="offer_price" value="{{ products.offer_price }}">
+                </div>
+
+                <!-- Discount -->
+                <div class="mb-3">
+                    <label for="discount" class="form-label">Discount (%)</label>
+                    <input type="number" class="form-control" id="discount" name="percentage_discount" value="{{ products.percentage_discount }}">
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="is_active" class="form-control">
+                        <option value="True" {% if products.is_active %}selected{% endif %}>Active</option>
+                        <option value="False" {% if not products.is_active %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label">Product Description</label>
+                    <textarea class="form-control" id="description" name="product_description" rows="4">{{ products.product_description }}</textarea>
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="mb-3">
+                    <label for="thumbnail" class="form-label">Product Thumbnail</label>
+                    <input type="file" class="form-control" id="thumbnail" name="thumbnail">
+                    {% if products.thumbnail %}
+                    <img src="{{ products.thumbnail.url }}" class="img-thumbnail mt-2" alt="Current thumbnail" style="width: 150px;">
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary">Update Product</button>
+                <a href="{% url 'product:list-product' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .img-thumbnail {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock content %}

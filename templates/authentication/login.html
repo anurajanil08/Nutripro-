@@ -5,26 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        /* Body background */
+        body {
+            background-color: #e9ecef;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            color: #333;
+        }
+
+        /* Centered login container */
+        .login-container {
+            margin-top: 80px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Title */
+        .login-header {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2B2D42;
+        }
+
+        /* Form label */
+        .form-group label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.85rem;
+        }
+
+        /* Form input styles */
+        .form-control {
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 0.85rem;
+            border: 1px solid #ced4da;
+            width: 100%;
+            height: 30px;
+        }
+
+        /* Submit button */
+        .btn-block {
+            background-color: #D10024;
+            border: none;
+            padding: 6px; /* Reduced padding */
+            font-size: 0.8rem; /* Reduced font size */
+            font-weight: bold;
+            border-radius: 15px; /* Reduced border radius */
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            height: 30px; /* Reduced height */
+            width: 80%; /* Reduced width */
+            margin: 10px auto; /* Center the button */
+        }
+
+        .btn-block:hover {
+            background-color: #A8001C;
+        }
+
+        /* Google sign-in button */
+        .google-btn {
+            width: 80%; /* Reduced width */
+            background-color: #4285F4;
+            border: none;
+            padding: 6px; /* Reduced padding */
+            color: white;
+            font-weight: 700;
+            border-radius: 15px; /* Reduced border radius */
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: 0.2s all;
+            font-size: 0.8rem; /* Reduced font size */
+            height: 30px; /* Reduced height */
+            margin: 10px auto; /* Center the button */
+        }
+
+        .google-btn:hover {
+            background-color: #3367D6;
+        }
+
+        .google-icon {
+            background: url('https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg') no-repeat;
+            background-size: contain;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        /* Ensure inputs take full width */
+        .form-group input {
+            width: 100%;
+        }
+        .google-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #4285F4;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+    </style>
 </head>
 <body>
-    <div class="container" style="margin-top: 100px;">
+    <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-4">
-                <h2 class="text-center">Login</h2>
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">
+                <div class="login-container">
+
+                    <h2 class="text-center login-header">Login</h2>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger">
+                                    {{ form.email.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger">
+                                    {{ form.password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Example in template for Google login -->
+{% comment %} <a href="{% url 'socialaccount_login' 'google' %}" class="google-btn">Sign in with Google</a> {% endcomment %}
+{% load socialaccount %}
+
+<a href="{% provider_login_url 'google' %}" class="google-btn">Sign in with Google</a>
+
+
+
+
+
+
+
+
+                        Login with Google</a>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-block">Log In</button>
+
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a href="{% url 'nutri_auth:signup' %}">Sign Up</a></p>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
-                </form>
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+
                 </div>
             </div>
         </div>
