@@ -11,6 +11,7 @@ import random
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
+from .signals import otp_signal
 
 
 
@@ -24,6 +25,7 @@ User = get_user_model()
 def generate_otp():
     return str(random.randint(100000, 999999))
 
+
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -33,38 +35,20 @@ def signup(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
 
-            otp = generate_otp()
-            print(otp)
-
             request.session['temp_user_data'] = {
                 'email': email,
                 'username': username,
                 'password': password,
-                'otp': otp,
-                'otp_generated_time': timezone.now().isoformat()
             }
+            
+            otp_signal.send(sender=signup, user_data=request.session['temp_user_data'])
 
-            try:
-                send_mail(
-                    'Your OTP Code',
-                    f'Your OTP for account verification is {otp}.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
-            except Exception as e:
-                form.add_error(None, "Failed to send the OTP. Please try again.")
-                return render(request, 'authentication/signup.html', {'form': form})
-
-
-            return redirect('nutri_auth:verify-otp')  
-        
+            return redirect('nutri_auth:verify-otp')
 
     else:
         form = UserCreationForm()
 
     return render(request, 'authentication/signup.html', {'form': form})
-
 
 
 def verify_otp(request):
@@ -144,6 +128,7 @@ def handlelogin(request):
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, "login sucessfull")
                 return redirect('accounts:index')  
             else:
                 messages.error(request, "Invalid email or password.")

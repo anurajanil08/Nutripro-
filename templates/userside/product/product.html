@@ -1,247 +1,467 @@
 {% extends 'userside/base.html' %}
 {% load static %}
 {% block content %}
+<style>
+    /* Existing styles */
+    .star-rating-input {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .star-rating-input .stars {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 0.25rem;
+        justify-content: center;
+    }
+    
+    .star-rating-input .stars label {
+        cursor: pointer;
+        color: #d1d5db;
+        transition: color 0.2s ease-in-out;
+    }
+    
+    .star-rating-input .stars label:hover,
+    .star-rating-input .stars label:hover ~ label,
+    .star-rating-input .stars input:checked ~ label {
+        color: #fbbf24;
+    }
+    
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+    
+    .text-warning {
+        color: #fbbf24;
+    }
+    
+    .text-muted {
+        color: #d1d5db;
+    }
+    form {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+    }
+    .comment-box {
+        width: 100%;
+        max-width: 500px;
+        min-height: 100px;
+        padding: 10px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    /* New styles for product cards */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .product-card {
+        background-color: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        position: relative;
+        padding-top: 100%; /* 1:1 Aspect Ratio */
+        overflow: hidden;
+    }
+
+    .product-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background-color: #f8f9fa; /* Light gray background */
+    }
+
+    .product-info {
+        padding: 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-category {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-name a {
+        color: #333;
+        text-decoration: none;
+    }
+
+    .product-name a:hover {
+        color: #007bff;
+    }
+
+    .product-price-rating {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .product-price {
+        font-weight: bold;
+    }
+
+    .current-price {
+        font-size: 1.25rem;
+        color: #28a745;
+    }
+
+    .old-price {
+        font-size: 1rem;
+        color: #6c757d;
+        text-decoration: line-through;
+        margin-left: 0.5rem;
+    }
+
+    .product-rating {
+        color: #ffc107;
+    }
+
+    .product-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-btn {
+        background-color: transparent;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.25rem;
+        transition: color 0.3s ease;
+    }
+
+    .action-btn:hover {
+        color: #007bff;
+    }
+
+    .add-to-cart-btn {
+        background-color: #007bff;
+        border: none;
+        border-radius: 0.25rem;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
 
 <!-- BREADCRUMB -->
 <div id="breadcrumb" class="section">
-	<!-- container -->
-	<div class="container">
-		<!-- row -->
-		<div class="row">
-			<div class="col-md-12">
-				<ul class="breadcrumb-tree">
-					<li><a href="#">Home</a></li>
-					{% comment %} <li><a href="#">All Categories</a></li> {% endcomment %}
-					<li><a href="#">Creatien</a></li>
-					<li><a href="#">Protien Bars</a></li>
-					<li class="active">Protien Powder</li>
-				</ul>
-			</div>
-		</div>
-		<!-- /row -->
-	</div>
-	<!-- /container -->
+    <!-- container -->
+    <div class="container">
+        <!-- row -->
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="breadcrumb-tree">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Creatien</a></li>
+                    <li><a href="#">Protien Bars</a></li>
+                    <li class="active">Protien Powder</li>
+                </ul>
+            </div>
+        </div>
+        <!-- /row -->
+    </div>
+    <!-- /container -->
 </div>
 <!-- /BREADCRUMB -->
 
 <!-- SECTION -->
 <div class="section">
-	<div class="container">
-			<div class="row">
-					<!-- Product main img -->
-					<div class="col-md-5 col-md-push-2">
-							<div id="product-main-img">
-									{% for image in images %}
-									<div class="product-preview">
-											<img src="{{ image.images.url }}" alt="{{ product.Product_name }}">
-									</div>
-									{% endfor %}
-							</div>
-					</div>
+    <div class="container">
+        <div class="row">
+            <!-- Product main img -->
+            <div class="col-md-5 col-md-push-2">
+                <div id="product-main-img">
+                    {% for image in images %}
+                    <div class="product-preview">
+                        <img src="{{ image.images.url }}" alt="{{ product.Product_name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-					<!-- Product thumb imgs -->
-					<div class="col-md-2 col-md-pull-5">
-							<div id="product-imgs">
-									{% for image in images %}
-									<div class="product-preview">
-											<img src="{{ image.images.url }}" alt="{{ product.Product_name }}">
-									</div>
-									{% endfor %}
-							</div>
-					</div>
+            <!-- Product thumb imgs -->
+            <div class="col-md-2 col-md-pull-5">
+                <div id="product-imgs">
+                    {% for image in images %}
+                    <div class="product-preview">
+                        <img src="{{ image.images.url }}" alt="{{ product.Product_name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-					<!-- Product details -->
-					<div class="col-md-5">
-							<div class="product-details">
-									<h2 class="product-name">{{ product.Product_name }}</h2>
-									<div>
-											<h3 class="product-price">${{ product.offer_price }} <del class="product-old-price">${{ product.price }}</del></h3>
-											<span class="product-available">In Stock</span>
-									</div>
-									<p>{{ product.Product_description }}</p>
+            <!-- Product details -->
+            <div class="col-md-5">
+                <div class="product-details">
+                    <h2 class="product-name">{{ product.Product_name }}</h2>
+                    <div>
+                        <h3 class="product-price">₹{{ product.offer_price }} <del class="product-old-price">₹{{ product.price }}</del></h3>
+                        <span class="product-available">In Stock</span>
+                    </div>
+                    <p>{{ product.Product_description }}</p>
 
-									<div class="product-options">
-											<label>
-													Size
-													<select class="input-select">
-															{% for variant in variants %}
-															<option value="{{ variant.id }}">{{ variant.size }}</option>
-															{% endfor %}
-													</select>
-											</label>
-									</div>
+                    <div class="product-options">
+                        <label>
+                            Size
+                            <select class="input-select">
+                                {% for variant in variants %}
+                                <option value="{{ variant.id }}">{{ variant.size }}g</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
 
-									<div class="add-to-cart">
-											<div class="qty-label">
-													Qty
-													<div class="input-number">
-															<input type="number" value="1" min="1">
-															<span class="qty-up">+</span>
-															<span class="qty-down">-</span>
-													</div>
-											</div>
-											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-									</div>
+                    <div class="add-to-cart">
+                        <div class="qty-label">
+                            Qty
+                            <div class="input-number">
+                                <input type="number" value="1" min="1">
+                                <span class="qty-up">+</span>
+                                <span class="qty-down">-</span>
+                            </div>
+                        </div>
+                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+                    </div>
 
-									<ul class="product-btns">
-											<li><a href="#"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
-									</ul>
+                    <ul class="product-btns">
+                        <li><a href="#"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
+                    </ul>
 
-									<ul class="product-links">
-											<li>Category:</li>
-											<li><a href="#">{{ product.Product_category.category_name }}</a></li>
-									</ul>
+                    <ul class="product-links">
+                        <li>Category:</li>
+                        <li><a href="#">{{ product.Product_category.category_name }}</a></li>
+                    </ul>
 
-									<ul class="product-links">
-											<li>Brand:</li>
-											<li><a href="#">{{ product.Product_brand.brand_name }}</a></li>
-									</ul>
+                    <ul class="product-links">
+                        <li>Brand:</li>
+                        <li><a href="#">{{ product.Product_brand.brand_name }}</a></li>
+                    </ul>
 
-							</div>
-					</div>
-			</div>
-	</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 <!-- /SECTION -->
+
+<!-- product tab content -->
+<div class="comments-area style-2 container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 d-flex flex-column align-items-center">
+            <!-- Review Submission Form -->
+            <h4 class="mb-4">Submit a Review</h4>
+            <form method="post" class="mb-4 d-flex flex-column align-items-center w-100">
+                {% csrf_token %}
+                <!-- Interactive Star Rating Input -->
+                <div class="star-rating-input mb-4 text-center">
+                    <label class="d-block mb-2">Your Rating</label>
+                    <div class="stars">
+                        <input type="radio" id="star5" name="rating" value="5" class="visually-hidden">
+                        <label for="star5" title="5 stars">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </label>
+                        <input type="radio" id="star4" name="rating" value="4" class="visually-hidden">
+                        <label for="star4" title="4 stars">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </label>
+                        <input type="radio" id="star3" name="rating" value="3" class="visually-hidden">
+                        <label for="star3" title="3 stars">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </label>
+                        <input type="radio" id="star2" name="rating" value="2" class="visually-hidden">
+                        <label for="star2" title="2 stars">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </label>
+                        <input type="radio" id="star1" name="rating" value="1" class="visually-hidden">
+                        <label for="star1" title="1 star">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-column align-items-center w-100">
+                    <textarea name="comment" class="comment-box" placeholder="Write your review here..."></textarea>
+                    <button type="submit" class="btn btn-primary mt-3">Submit Review</button>
+                </div>
+            </form>
+
+            <!-- Display Reviews -->
+            {% for review in reviews %}
+            <div class="comment-list mb-4">
+                <div class="single-comment p-3 bg-light rounded shadow-sm w-100">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="thumb text-center mr-3">
+                            <img src="{% static 'user_side/assets/imgs/page/avatar-6.jpg' %}" alt="" class="img-thumbnail rounded-circle" style="width: 60px;">
+                        </div>
+                        <div>
+                            <h6 class="mb-0"><a href="#" class="text-dark">{{ review.user.first_name }}</a></h6>
+                            <p class="mb-0 text-muted font-italic">{{ review.user.email }}</p>
+                            <p class="font-xxs text-muted">Member since {{ review.user.date_joined|date:"Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="desc">
+                        <!-- Star Rating Display -->
+                        <div class="star-rating-display mb-2">
+                            {% for i in review.rating|ljust:5 %}
+                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="{% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}" fill="currentColor">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            {% endfor %}
+                        </div>
+                        <p class="mb-2">{{ review.comment }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p class="font-xs text-muted">{{ review.created_at|date:"F j, Y" }}</p>
+                            
+                            {% if request.user == review.user %}
+                            <form action="{% url 'product:delete-review' review.id %}" method="post" class="mb-0">
+                                {% csrf_token %}
+                                <button class="btn btn-danger btn-sm" type="submit" title="Delete Review">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 6h18v2H3V6zm2 3v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9H5zm6 0h2v10h-2V9zm-4 0h2v10H7V9zm8 0h2v10h-2V9zM16 4l-1-1H9L8 4H5v2h14V4h-3z"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            {% endif %} 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 <!-- Section -->
 <div class="section">
-	<!-- container -->
-	<div class="container">
-		<!-- row -->
-		<div class="row">
-
-			<div class="col-md-12">
-				<div class="section-title text-center">
-					<h3 class="title">Related Products</h3>
-				</div>
-			</div>
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="{% static 'userside/./img/product01.png' %}" alt="">
-						<div class="product-label">
-							<span class="sale">-30%</span>
-						</div>
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">2999 <del class="product-old-price">3200</del></h4>
-						<div class="product-rating">
-						</div>
-						<div class="product-btns">
-							<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-							<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-							<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-						</div>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="{% static 'userside/./img/product02.png' %}" alt="">
-						<div class="product-label">
-							<span class="new">NEW</span>
-						</div>
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">2999 <del class="product-old-price">3200</del></h4>
-						<div class="product-rating">
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-						</div>
-						<div class="product-btns">
-							<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-							<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-							<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-						</div>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
-			<div class="clearfix visible-sm visible-xs"></div>
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="{% static 'userside/./img/product03.png' %}" alt="">
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-						<div class="product-rating">
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star-o"></i>
-						</div>
-						<div class="product-btns">
-							<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-							<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-							<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-						</div>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="{% static 'userside/./img/product04.png' %}" alt="">
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">2999 <del class="product-old-price">3200</del></h4>
-						<div class="product-rating">
-						</div>
-						<div class="product-btns">
-							<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-							<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-							<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-						</div>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
-		</div>
-		<!-- /row -->
-	</div>
-	<!-- /container -->
+    <!-- container -->
+    <div class="container">
+        <h2>Related Products</h2>
+        <div class="product-grid">
+            {% for related_product in related_products %}
+            <div class="product-card">
+                <a href="{% url 'product:product-detail-page' related_product.id %}" class="product-link">
+                    <div class="product-image">
+                        {% if related_product.thumbnail %}
+                            <img src="{{ related_product.thumbnail.url }}" alt="{{ related_product.Product_name }}">
+                        {% else %}
+                            <img src="{% static 'userside/img/default-product.png' %}" alt="Default Image">
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="product-info">
+                    <p class="product-category">{{ related_product.Product_category.category_name }}</p>
+                    <h3 class="product-name">
+                        <a href="{% url 'product:product-detail-page' related_product.id %}">
+                            {{ related_product.Product_name }}
+                        </a>
+                    </h3>
+                    <div class="product-price-rating">
+                        <div class="product-price">
+                            <span class="current-price">₹{{ related_product.offer_price }}</span>
+                            <span class="old-price">₹{{ related_product.price }}</span>
+                        </div>
+                        <div class="product-rating">
+                            {% for i in "12345" %}
+                                <span class="star">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn" aria-label="Add to wishlist">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                            <button class="action-btn" aria-label="Compare">
+                                <i class="fa fa-exchange"></i>
+                            </button>
+                            <button class="action-btn" aria-label="Quick view">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <button class="add-to-cart-btn">
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p>No related products found.</p>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- /container -->
 </div>
 <!-- /Section -->
-
 
 {% endblock %}

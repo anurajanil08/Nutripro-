@@ -8,6 +8,9 @@
 		 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
 		<title>NUTRIPRO</title>
+		<!-- Include Font Awesome for star icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 
 		<!-- Google font -->
 		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
@@ -43,7 +46,7 @@
 			<div id="top-header">
 				<div class="container">
 					<ul class="header-links pull-left">
-						<li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
+						<li><a href="#"><i class="fa fa-envelope-o"></i>  {{ request.user.email }}</a></li>
 					</ul>
 					<ul class="header-links pull-right">
 							{% if user.is_authenticated %}
@@ -168,27 +171,7 @@
 		</header>
 		<!-- /HEADER -->
 
-		 <!-- NAVIGATION -->
-		 <nav id="navigation">
-	
-			<!-- container -->
-			<div class="container">
-				<!-- responsive-nav -->
-				<div id="responsive-nav">
-					<!-- NAV -->
-					<ul class="main-nav nav navbar-nav">
-						<li class="active"><a href="{% url 'accounts:index' %}">Home</a></li>
-						<li><a href="{% url 'accounts:shop_page' %}">Shop page</a></li>
-						<li><a href="{% url 'accounts:shop_page' %}">Categories</a></li>
-						<li><a href="{% url 'accounts:shop_page' %}">Brand</a></li>
-					</ul>
-					<!-- /NAV -->
-				</div>
-				<!-- /responsive-nav -->
-			</div>
-			<!-- /container -->
-		</nav>
-		<!-- /NAVIGATION -->
+		 
 
 	{% block content %}
 
@@ -328,6 +311,33 @@
 		<script src="{% static 'userside/js/nouislider.min.js' %}"></script>
 		<script src="{% static 'userside/js/jquery.zoom.min.js' %}"></script>
 		<script src="{% static 'userside/js/main.js' %}"></script>
+
+		<!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            {% if messages %}
+                const messages = [
+                    {% for message in messages %}
+                        {
+                            level: "{{ message.tags }}",
+                            text: "{{ message }}"
+                        },
+                    {% endfor %}
+                ];
+                messages.forEach(message => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-right',
+                        icon: message.level === 'success' ? 'success' : 'error',
+                        title: message.text,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                });
+            {% endif %}
+        });
+    </script>
 
 	</body>
 </html>

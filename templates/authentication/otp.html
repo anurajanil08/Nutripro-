@@ -1,13 +1,19 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% load socialaccount %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Verification</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #f6f6f6, #e9ecef);
+            font-family: 'Montserrat', sans-serif;
         }
 
         .otp-container {
@@ -15,13 +21,16 @@
             margin: 100px auto;
             padding: 20px;
             background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .otp-header {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
         }
 
         .form-group {
@@ -38,6 +47,7 @@
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            box-sizing: border-box;
         }
 
         #timer {
@@ -55,6 +65,9 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
         }
 
         #submit-btn {
@@ -63,7 +76,7 @@
 
         #resend-btn {
             background-color: #007bff;
-            display: none;
+            display: none; /* Initially hidden */
         }
 
         #submit-btn:hover {
@@ -72,6 +85,12 @@
 
         #resend-btn:hover {
             background-color: #0069d9;
+        }
+
+        /* Error message styling */
+        .text-danger {
+            font-size: 0.85rem;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -89,9 +108,9 @@
             </div>
 
             <button id="submit-btn" class="button" type="submit">Submit OTP</button>
-            <button id="resend-btn" class="button" type="button">Resend OTP</button>
         </form>
 
+        <button id="resend-btn" class="button" type="button">Resend OTP</button>
         <div id="timer">Time remaining: 02:00</div>
     </div>
 
@@ -100,24 +119,24 @@
             const timerElement = document.getElementById("timer");
             const submitBtn = document.getElementById("submit-btn");
             const resendBtn = document.getElementById("resend-btn");
-            const otpInput = document.getElementById("otp");
-
+        
             const TIMER_LENGTH = 120; // Timer length in seconds (2 minutes)
             let endTime = localStorage.getItem("otpEndTime");
-
-            if (!endTime) {
+        
+            // Reset timer if endTime is expired or not set
+            if (!endTime || calculateTimeRemaining(endTime) <= 0) {
                 endTime = Math.floor(Date.now() / 1000) + TIMER_LENGTH;
                 localStorage.setItem("otpEndTime", endTime);
             }
-
-            function calculateTimeRemaining() {
+        
+            function calculateTimeRemaining(endTime) {
                 const currentTime = Math.floor(Date.now() / 1000);
                 return endTime - currentTime;
             }
-
+        
             function startCountdown() {
-                let remainingTime = calculateTimeRemaining();
-
+                let remainingTime = calculateTimeRemaining(endTime);
+        
                 if (remainingTime <= 0) {
                     timerElement.innerHTML = "OTP has expired.";
                     submitBtn.style.display = "none";
@@ -125,33 +144,32 @@
                     localStorage.removeItem("otpEndTime");
                     return;
                 }
-
+        
                 const countdown = setInterval(() => {
-                    const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
-                    const seconds = String(remainingTime % 60).padStart(2, '0');
-                    timerElement.innerHTML = `Time remaining: ${minutes}:${seconds}`;
-
+                    remainingTime = calculateTimeRemaining(endTime);
                     if (remainingTime <= 0) {
                         clearInterval(countdown);
                         timerElement.innerHTML = "OTP has expired.";
                         submitBtn.style.display = "none";
                         resendBtn.style.display = "block";
                         localStorage.removeItem("otpEndTime");
+                    } else {
+                        const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
+                        const seconds = String(remainingTime % 60).padStart(2, '0');
+                        timerElement.innerHTML = `Time remaining: ${minutes}:${seconds}`;
                     }
-
-                    remainingTime--;
                 }, 1000);
             }
-
+        
             function sendOtpToEmail() {
                 fetch("{% url 'nutri_auth:resent-otp' %}", {
                     method: 'GET',
                 }).then(response => {
                     if (response.ok) {
                         alert('OTP resent to your email!');
-                        const newEndTime = Math.floor(Date.now() / 1000) + TIMER_LENGTH;
-                        localStorage.setItem("otpEndTime", newEndTime);
-                        endTime = newEndTime;
+                        // Reset timer on OTP resend
+                        endTime = Math.floor(Date.now() / 1000) + TIMER_LENGTH;
+                        localStorage.setItem("otpEndTime", endTime);
                         submitBtn.style.display = "block";
                         resendBtn.style.display = "none";
                         startCountdown();
@@ -162,12 +180,13 @@
                     alert('Error: Unable to resend OTP.');
                 });
             }
-
+        
             resendBtn.addEventListener("click", sendOtpToEmail);
-
+        
             startCountdown();
         });
     </script>
 
 </body>
 </html>
+{% endblock %}

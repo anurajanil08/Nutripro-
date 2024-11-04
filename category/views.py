@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect,get_object_or_404
 from .forms import CategoryForm
 from .models import Category
 from django.contrib import messages
+from adminpanel.decorators import admin_required 
 
 # Create your views here.
 
+@admin_required
 def create_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -15,6 +17,7 @@ def create_category(request):
         form = CategoryForm()
     return render(request, 'adminside/category/category.html', {'form': form})
 
+@admin_required
 def edit_category(request, id):
     
     category = get_object_or_404(Category, id=id)
@@ -32,12 +35,12 @@ def edit_category(request, id):
         form = CategoryForm(instance=category)
     
     return render(request, 'adminside/category/editcategory.html', {'form': form, 'category': category})
-
+@admin_required
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'adminside/category/listcategory.html', {'categories': categories})
 
-
+@admin_required
 def toggle_category_status(request, category_id):
     
     category = get_object_or_404(Category, id=category_id)
@@ -54,6 +57,7 @@ def toggle_category_status(request, category_id):
     
     return redirect('category:listcategory')
 
+@admin_required
 def delete_category(request, id):
     category = Category.objects.get(id=id)
     category.delete()

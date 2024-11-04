@@ -4,6 +4,10 @@ from django.shortcuts import get_object_or_404
 from .models import Product ,ProductImages ,ProductVariant
 from brand.models import Brand
 from category.models import Category
+from django.db.models import Avg
+from .models import Product, ProductImages, ProductVariant, Review
+from .forms import ReviewForm
+from django.contrib import messages
 
 
 def add_product(request):
@@ -37,6 +41,40 @@ def add_images(request, product_id):
     return render(request, 'adminside/product/add_images.html', {'product': product})
 
 
+def edit_images(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    product_images = ProductImages.objects.filter(Product=product)
+
+    if request.method == 'POST':
+        thumbnail = request.FILES.get('thumbnail')
+        new_images = request.FILES.getlist('images')
+
+        if thumbnail:
+            product.thumbnail = thumbnail
+            product.save()
+
+        for image in new_images:
+            ProductImages.objects.create(Product=product, images=image)
+
+        image_ids_to_delete = request.POST.getlist('delete_images')
+        ProductImages.objects.filter(id__in=image_ids_to_delete).delete()
+
+        return redirect('product:product-detail', product_id=product.id)
+    
+
+    return render(request, 'adminside/product/edit_images.html', {
+        'product': product,
+        'product_images': product_images,
+    })
+
+
+def delete_image(request, image_id):
+    image = get_object_or_404(ProductImages, id=image_id)
+    product_id = image.Product.id
+    image.delete()
+    messages.success(request, "Image deleted successfully.")
+    return redirect('product:edit_images', product_id=product_id)
+
 
 def product_detail(request, product_id):
     products = get_object_or_404(Product, id=product_id) 
@@ -61,23 +99,29 @@ def toggle_product_status(request, pk):
 
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    
-
     categories = Category.objects.all()
     brands = Brand.objects.all()
 
     if request.method == 'POST':
+        product.product_name = request.POST.get('product_name')
+        product.price = request.POST.get('price')
+        product.offer_price = request.POST.get('offer_price')
+        product.percentage_discount = request.POST.get('percentage_discount')
+        product.product_description = request.POST.get('product_description')
+        product.is_active = request.POST.get('is_active') == 'True'
 
-        form = ProductForm(request.POST,request.FILES,instance=product)
+        category_id = request.POST.get('product_category')
+        brand_id = request.POST.get('product_brand')
 
-        if form.is_valid():
+        if category_id:
+            product.product_category = get_object_or_404(Category, id=category_id)
+        if brand_id:
+            product.product_brand = get_object_or_404(Brand, id=brand_id)
 
-            form.save()
-            return redirect('product_detail',product_id=product.id)
-    else:
-        form = ProductForm(instance=product)
+        product.save()
+        return redirect('product:list-product')
+
     return render(request, 'adminside/product/editproduct.html', {
-        'form': form,
         'products': product,
         'categories': categories,
         'brands': brands,
@@ -139,9 +183,43 @@ def toggle_variant_status(request, variant_id):
 # user side product function
 
 
+
 def product_detail_page(request, product_id):
-    product = get_object_or_404(Product, id=product_id) 
+    product = get_object_or_404(Product, id=product_id)
     images = ProductImages.objects.filter(Product=product)
-    return render(request, 'userside/product/product.html', {'product': product, 'images': images})
+    variants = ProductVariant.objects.filter(Product=product, variant_status=True)
+    reviews = Review.objects.filter(Product=product)  
+    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] 
+
+    related_products = Product.objects.filter(
+        Product_category=product.Product_category  
+    ).exclude(id=product.id)[:4]
+
+    review_form = ReviewForm()
+
+    if request.method == 'POST':
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            review = review_form.save(commit=False)
+            review.user = request.user
+            review.Product = product
+            review.save()
+            return redirect('product:product-detail-page', product_id=product.id)  
+
+    return render(request, 'userside/product/product.html', {
+        'product': product,
+        'images': images,
+        'variants': variants,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'review_form': review_form,
+        'related_products': related_products,  
+    })
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    review.delete()
+    return redirect('product:product-detail-page', product_id=review.Product.id)
+
+
 
 

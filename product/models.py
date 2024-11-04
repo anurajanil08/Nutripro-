@@ -31,9 +31,9 @@ class ProductVariant(models.Model):
     size = models.CharField(max_length=10, null=True) 
     stock = models.BigIntegerField(null=False, default=0)
     variant_status = models.BooleanField(default=True)
-
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     def __str__(self):
-        return f"{self.Product.Product_name} - {self.flavor_name} - {self.size}"
+        return f"{self.Product.Product_name} - {self.size}"
 
 
 class ProductImages(models.Model):

@@ -35,27 +35,13 @@
                             <!-- Category -->
                             <tr>
                                 <th scope="row">Category</th>
-                                <td>{% if products.product_category %}{{ products.product_category.category_name }}{% else %}No category{% endif %}</td>
+                                <td>{% if products.Product_category %}{{ products.Product_category.category_name }}{% else %}No category{% endif %}</td>
                             </tr>
 
                             <!-- Brand -->
                             <tr>
                                 <th scope="row">Brand</th>
-                                <td>{% if products.product_brand %}{{ products.product_brand.brand_name }}{% else %}No brand{% endif %}</td>
-                            </tr>
-
-                            <!-- Size (Add Sizes Row) -->
-                            <tr>
-                                <th scope="row">Size:</th>
-                                <td>
-                                    {% if products.sizes.exists %}
-                                        {% for size in products.sizes.all %}
-                                            <span class="badge bg-info">{{ size.size_name }}</span>
-                                        {% endfor %}
-                                    {% else %}
-                                        No sizes available
-                                    {% endif %}
-                                </td>
+                                <td>{% if products.Product_brand %}{{ products.Product_brand.brand_name }}{% else %}No brand{% endif %}</td>
                             </tr>
 
                             <!-- Price -->
@@ -89,7 +75,7 @@
                             <!-- Description -->
                             <tr>
                                 <th scope="row">Description</th>
-                                <td>{{ products.product_description }}</td>
+                                <td>{{ products.Product_description }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -102,6 +88,8 @@
                         <!-- Variant Button -->
                         <a href="{% url 'product:product_variant' products.id %}" class="btn btn-sm btn-warning">Variants</a>
 
+                        <a href="{% url 'product:edit_images' products.id %}" class="btn btn-sm btn-secondary">Edit Images</a>
+                        
                         <!-- Status Button -->
                         <td>
                             <form action="{% url 'product:product_status' products.id %}" method="POST" style="display: inline;" id="toggleStatusForm{{ products.id }}">

@@ -4,12 +4,12 @@ from nutri_auth.models import User
 from django.contrib.auth import login, authenticate
 from .forms import AdminLoginForm
 from django.contrib.auth import logout
+from .decorators import admin_required
 
 
 # Create your views here.
 
-def demo(request):
-  return render(request,"base.html")
+
 
 
 def admin_login_view(request):
@@ -36,15 +36,16 @@ def admin_login_view(request):
 
     return render(request, 'adminside/dashboard/login.html', {'form': form})
 
-
+@admin_required
 def dashboard(request):
   return render(request,"adminside/dashboard/dashboard.html")
 
-
+@admin_required
 def list_users(request):
     users = User.objects.filter(is_admin=False) 
     return render(request, 'adminside/user/userlist.html', {'users': users})
 
+@admin_required
 def toggle_user_active(request, user_id):
     
     user = get_object_or_404(User, id=user_id)
@@ -58,7 +59,12 @@ def toggle_user_active(request, user_id):
     
     return redirect('adminpanel:userlist')
 
+
+@admin_required
 def custom_logout_view(request):
     logout(request)
     return redirect('adminpanel:adminlogin')
 
+
+def demo(request):
+  return render(request,"base.html")

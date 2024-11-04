@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from product.models import Product,ProductVariant,ProductImages
 
+
+
 # Create your views here.
+
 
 
 def index(request):
@@ -24,6 +27,7 @@ def index(request):
     }
 
     return render(request, "userside/index.html", context)
+
 
 def shop_page(request):
     products = Product.objects.filter(is_active=True)
