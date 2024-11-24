@@ -24,15 +24,22 @@
                         <tr>
                             <th>Size</th>
                             <th>Stock</th>
+                            <th>Price</th>
+                            <th>Offer price</th>
                             <th>Status</th>
                             <th>Actions</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
                         {% for variant in variants %}
                         <tr>
+                           
                             <td>{{ variant.size }} g</td>
                             <td>{{ variant.stock }}</td>
+                            <td>{{variant.price}}</td>
+                            <td>{{variant.offer_price}}</td>
+
                             <td>
                                 <span class="badge {% if variant.variant_status %}bg-success{% else %}bg-danger{% endif %}">
                                     {{ variant.variant_status|yesno:"Active,Inactive" }}

@@ -1,0 +1,285 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% load socialaccount %}
+
+{% block content %}
+<title>Shopping Cart</title>
+
+<!-- Add custom CSS for styling -->
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .cart-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .cart-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+    }
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .cart-table th, .cart-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eaeaea;
+    }
+    .cart-table th {
+        font-weight: 700;
+        color: #333;
+    }
+    .product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .quantity-input {
+        width: 50px;
+        padding: 8px;
+        text-align: center;
+        border-radius: 4px;
+    }
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+    }
+    .cart-summary {
+        margin-top: 20px;
+        text-align: right;
+    }
+    .cart-summary h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+    }
+    .cart-summary .total-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: #007bff;
+    }
+</style>
+
+<!-- Cart HTML structure -->
+<div class="container">
+    <div class="cart-header">
+        <h1>Your Cart</h1>
+    </div>
+
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Variant</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr data-item-id="{{ item.id }}" data-price="{{ item.variant.offer_price }}">
+                <td>
+                    {% if item.product.thumbnail %}
+                        <img src="{{ item.product.thumbnail.url }}" alt="{{ item.product.Product_name }}" class="product-image">
+                    {% else %}
+                        <span>No Image</span>
+                    {% endif %}
+                    {{ item.product.Product_name }}
+                </td>
+                <td>{{ item.variant.size }}</td>
+                <td>
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" data-item-id="{{ item.id }}">
+                </td>
+                <td class="item-price">${{ item.variant.offer_price }}</td>
+                <td class="subtotal">${{ item.sub_total }}</td>
+                <td>
+                    <button type="button" class="btn btn-secondary" onclick="confirmDelete({{ item.id }})">Remove</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="cart-summary">
+        <h2>Total: <span class="total-price">${{ total_price }}</span></h2>
+        <a href="{% url 'cart:checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>
+
+<!-- Include SweetAlert2 library for confirmation dialogs -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- JavaScript -->
+<script>
+    function parsePriceString(priceStr) {
+        return parseFloat(priceStr.replace('$', '').trim());
+    }
+
+    function formatPrice(number) {
+        return `$${number.toFixed(2)}`;
+    }
+
+    function calculateSubtotal(price, quantity) {
+        return price * quantity;
+    }
+
+    function updatePriceDisplay(itemId, newQuantity) {
+        const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+        if (!row) return;
+
+        const price = parseFloat(row.dataset.price);
+        const subtotal = calculateSubtotal(price, newQuantity);
+
+        // Update subtotal display
+        const subtotalElement = row.querySelector('.subtotal');
+        subtotalElement.textContent = formatPrice(subtotal);
+
+        // Calculate and update total price
+        calculateAndUpdateTotal();
+    }
+
+    function calculateAndUpdateTotal() {
+        const subtotalElements = document.querySelectorAll('.subtotal');
+        const total = Array.from(subtotalElements).reduce((sum, element) => {
+            const subtotal = parsePriceString(element.textContent);
+            return sum + subtotal;
+        }, 0);
+
+        const totalElement = document.querySelector('.total-price');
+        totalElement.textContent = formatPrice(total);
+    }
+
+    function updateCartItem(itemId, newQuantity) {
+        if (newQuantity < 1) return;
+
+        updatePriceDisplay(itemId, newQuantity);
+
+        const url = "{% url 'cart:update_cart_item' 0 %}".replace('0', itemId);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ quantity: newQuantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            location.reload();
+        });
+    }
+
+    function confirmDelete(itemId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to remove this item from your cart?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#007bff',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removeFromCart(itemId);
+            }
+        });
+    }
+
+    function removeFromCart(itemId) {
+        const url = "{% url 'cart:remove_from_cart' 0 %}".replace('0', itemId);
+    
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Removed!',
+                    text: 'The item has been removed from your cart.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.error || 'Failed to remove the item. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'An error occurred while trying to remove the item.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+    }
+    
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.dataset.itemId;
+            const newQuantity = parseInt(this.value);
+            if (newQuantity >= 1) {
+                updateCartItem(itemId, newQuantity);
+            } else {
+                this.value = 1;
+                updateCartItem(itemId, 1);
+            }
+        });
+    });
+
+    calculateAndUpdateTotal();
+</script>
+
+{% endblock %}

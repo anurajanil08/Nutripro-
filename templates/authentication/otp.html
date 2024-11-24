@@ -76,7 +76,7 @@
 
         #resend-btn {
             background-color: #007bff;
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         #submit-btn:hover {
@@ -87,7 +87,6 @@
             background-color: #0069d9;
         }
 
-        /* Error message styling */
         .text-danger {
             font-size: 0.85rem;
             margin-top: 5px;
@@ -95,16 +94,19 @@
     </style>
 </head>
 <body>
-
     <div class="otp-container">
         <h2 class="otp-header">OTP Verification</h2>
         <p>Enter the OTP sent to your email:</p>
 
-        <form id="otp-form" method="POST" action="{% url 'nutri_auth:verify-otp' %}">
+        <form id="otp-form" method="POST" action="{% url 'nutri_auth:verify-otp' %}" onsubmit="return validateForm()">
             {% csrf_token %}
             <div class="form-group">
                 <label for="otp">OTP</label>
-                <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                <input type="text" id="otp" name="otp" placeholder="Enter OTP" required 
+                       pattern="[0-9]*" maxlength="6" inputmode="numeric">
+                <div id="otp-error" class="text-danger" style="display: none;">
+                    Please enter a valid OTP
+                </div>
             </div>
 
             <button id="submit-btn" class="button" type="submit">Submit OTP</button>
@@ -112,6 +114,16 @@
 
         <button id="resend-btn" class="button" type="button">Resend OTP</button>
         <div id="timer">Time remaining: 02:00</div>
+
+        {% if messages %}
+        <div class="messages mt-3">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
     <script>
@@ -119,6 +131,9 @@
             const timerElement = document.getElementById("timer");
             const submitBtn = document.getElementById("submit-btn");
             const resendBtn = document.getElementById("resend-btn");
+            const otpForm = document.getElementById("otp-form");
+            const otpInput = document.getElementById("otp");
+            const otpError = document.getElementById("otp-error");
         
             const TIMER_LENGTH = 120; // Timer length in seconds (2 minutes)
             let endTime = localStorage.getItem("otpEndTime");
@@ -164,10 +179,13 @@
             function sendOtpToEmail() {
                 fetch("{% url 'nutri_auth:resent-otp' %}", {
                     method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
                 }).then(response => {
                     if (response.ok) {
                         alert('OTP resent to your email!');
-                        // Reset timer on OTP resend
                         endTime = Math.floor(Date.now() / 1000) + TIMER_LENGTH;
                         localStorage.setItem("otpEndTime", endTime);
                         submitBtn.style.display = "block";
@@ -180,13 +198,21 @@
                     alert('Error: Unable to resend OTP.');
                 });
             }
+
+          
+
+            // Input validation
+            otpInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 6) {
+                    this.value = this.value.slice(0, 6);
+                }
+            });
         
             resendBtn.addEventListener("click", sendOtpToEmail);
-        
             startCountdown();
         });
     </script>
-
 </body>
 </html>
 {% endblock %}

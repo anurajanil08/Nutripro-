@@ -85,6 +85,19 @@
                         <p>Product Management</p>
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'order:admin_order_list' %}">
+                        <i class="ti-view-list-alt"></i>
+                        <p>Order Management</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'coupons:coupon_list' %}">
+                        <i class="ti-view-list-alt"></i>
+                        <p>Coupon Management</p>
+                    </a>
+                </li>
+
                 <a class="btn btn-danger float-right" href="{% url 'adminpanel:logout' %}" style="margin-left: 20px;">
                     Logout
                 </a>

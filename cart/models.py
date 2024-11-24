@@ -31,7 +31,8 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.variant} in {self.cart}"
-
-    # Subtotal for this cart item
+    
     def sub_total(self):
-        return self.variant.price * self.quantity
+        if self.variant.offer_price is not None:
+            return self.variant.offer_price * self.quantity
+        return 0 

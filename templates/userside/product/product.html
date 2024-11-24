@@ -201,6 +201,24 @@
     .add-to-cart-btn:hover {
         background-color: #0056b3;
     }
+
+    .wishlist-icon {
+        color: red;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    
+    .wishlist-icon .fas {
+        color: red;
+    }
+    
+    .wishlist-icon .far {
+        color: gray;
+    }
+    .qty-label, .input-number {
+        display: none;
+    }
+    
 </style>
 
 <!-- BREADCRUMB -->
@@ -238,7 +256,7 @@
                     {% endfor %}
                 </div>
             </div>
-
+        
             <!-- Product thumb imgs -->
             <div class="col-md-2 col-md-pull-5">
                 <div id="product-imgs">
@@ -249,57 +267,70 @@
                     {% endfor %}
                 </div>
             </div>
-
-            <!-- Product details -->
+        
             <div class="col-md-5">
                 <div class="product-details">
                     <h2 class="product-name">{{ product.Product_name }}</h2>
                     <div>
-                        <h3 class="product-price">₹{{ product.offer_price }} <del class="product-old-price">₹{{ product.price }}</del></h3>
-                        <span class="product-available">In Stock</span>
+                        <h3 class="product-price" id="displayed-price">
+                            ₹<span id="variant-offer-price">{{ variants.first.offer_price }}</span>
+                            <del class="product-old-price">₹<span id="variant-original-price">{{ variants.first.price }}</span></del>
+                        </h3>
+                        <span class="product-available">
+                            {% if variant.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}
+                        </span>
+                        
                     </div>
                     <p>{{ product.Product_description }}</p>
-
+         
                     <div class="product-options">
                         <label>
                             Size
-                            <select class="input-select">
+                            <select class="input-select" id="variant-select">
                                 {% for variant in variants %}
-                                <option value="{{ variant.id }}">{{ variant.size }}g</option>
+                                    <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-offer-price="{{ variant.offer_price }}">
+                                        {{ variant.size }}g - ₹{{ variant.offer_price }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </label>
                     </div>
-
-                    <div class="add-to-cart">
-                        <div class="qty-label">
-                            Qty
-                            <div class="input-number">
-                                <input type="number" value="1" min="1">
-                                <span class="qty-up">+</span>
-                                <span class="qty-down">-</span>
+        
+                    <!-- Wishlist button -->
+                    <a href="#" class="wishlist-icon" id="wishlist-btn" data-variant-id="">
+                        <i class="far fa-heart"></i>
+                    </a>
+        
+                    <form id="add-to-cart-form" method="post">
+                        {% csrf_token %}
+                        <div class="add-to-cart">
+                            <div class="qty-label">
+                                Qty
+                                <div class="input-number">
+                                    <input type="number" id="quantity-input" value="1" min="1">
+                                    <span class="qty-up">+</span>
+                                    <span class="qty-down">-</span>
+                                </div>
                             </div>
+                            <button id="add-to-cart-btn" class="add-to-cart-btn">
+                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                            </button>
                         </div>
-                        <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                    </div>
-
-                    <ul class="product-btns">
-                        <li><a href="#"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
-                    </ul>
-
+                    </form>
+        
                     <ul class="product-links">
                         <li>Category:</li>
                         <li><a href="#">{{ product.Product_category.category_name }}</a></li>
                     </ul>
-
+        
                     <ul class="product-links">
                         <li>Brand:</li>
                         <li><a href="#">{{ product.Product_brand.brand_name }}</a></li>
                     </ul>
-
                 </div>
             </div>
         </div>
+        
     </div>
 </div>
 <!-- /SECTION -->
@@ -449,9 +480,9 @@
                                 <i class="fa fa-eye"></i>
                             </button>
                         </div>
-                        <button class="add-to-cart-btn">
-                            <i class="fa fa-shopping-cart"></i> Add to Cart
-                        </button>
+                        
+
+                    
                     </div>
                 </div>
             </div>
@@ -463,5 +494,131 @@
     <!-- /container -->
 </div>
 <!-- /Section -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#add-to-cart-btn').on('click', function(e) {
+            e.preventDefault(); // Prevent the form from submitting the usual way
+
+            const variantId = $('#variant-select').val(); // Get selected variant ID
+            const quantity = $('#quantity-input').val(); // Get quantity
+            const csrfToken = '{{ csrf_token }}'; // CSRF token for security
+
+            $.ajax({
+                url: "{% url 'cart:add_to_cart' 0 %}".replace('/0/', `/${variantId}/`), // URL with variant ID
+                type: 'POST',
+                data: {
+                    'quantity': quantity,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message); // Success message (optional)
+                    } else {
+                        alert('Failed to add item to cart.'); // Failure message
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+
+  
+<!-- JavaScript to handle price update -->
+<script>
+    function updatePrice() {
+        const variantSelect = document.getElementById('variant-select');
+        const selectedVariant = variantSelect.options[variantSelect.selectedIndex];
+
+        // Get price and offer price for the selected variant
+        const newPrice = selectedVariant.getAttribute('data-price');
+        const newOfferPrice = selectedVariant.getAttribute('data-offer-price');
+
+        // Update the displayed prices
+        document.getElementById('variant-original-price').innerText = newPrice;
+        document.getElementById('variant-offer-price').innerText = newOfferPrice;
+    }
+
+    // Quantity increment/decrement functionality
+    document.querySelector('.qty-up').addEventListener('click', function() {
+        let quantity = parseInt(document.getElementById('quantity-input').value);
+        document.getElementById('quantity-input').value = quantity + 1;
+    });
+
+    document.querySelector('.qty-down').addEventListener('click', function() {
+        let quantity = parseInt(document.getElementById('quantity-input').value);
+        if (quantity > 1) {
+            document.getElementById('quantity-input').value = quantity - 1;
+        }
+    });
+
+    // Update price when the variant is changed
+    document.getElementById('variant-select').addEventListener('change', updatePrice);
+
+    // Initialize price on page load based on the default selected variant
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePrice(); // Update the price immediately when the page is loaded.
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wishlist button click functionality
+        document.querySelector('.wishlist-icon').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Get the selected variant ID and price from the selected option in the variant select dropdown
+            const variantSelect = document.getElementById('variant-select');
+            const selectedVariant = variantSelect.options[variantSelect.selectedIndex];
+            const selectedVariantId = selectedVariant.value;  // This gets the variant ID from the 'value' attribute
+            const selectedVariantPrice = selectedVariant.getAttribute('data-price');  // This gets the price from the 'data-price' attribute
+
+            // If variant ID is missing, alert the user and return
+            if (!selectedVariantId) {
+                alert("Variant ID is missing.");
+                return;
+            }
+
+            // Get CSRF token from the template
+            const csrfToken = "{{ csrf_token }}";
+
+            // Send AJAX request to toggle wishlist
+            $.ajax({
+                url: "{% url 'accounts:toggle_wishlist' %}",  // Django URL for toggling wishlist
+                type: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                data: {
+                    variant_id: selectedVariantId,  // The variant ID to toggle in wishlist
+                    csrfmiddlewaretoken: csrfToken  // CSRF token for protection
+                },
+                success: function(response) {
+                    // Handle the success response
+                    console.log(response);
+
+                    // Update heart icon based on wishlist status
+                    const heartIcon = document.querySelector('.wishlist-icon i');
+                    if (response.is_in_wishlist) {
+                        heartIcon.classList.remove("far", "fa-heart");
+                        heartIcon.classList.add("fas", "fa-heart");
+                    } else {
+                        heartIcon.classList.remove("fas", "fa-heart");
+                        heartIcon.classList.add("far", "fa-heart");
+                    }
+                },
+                error: function(xhr) {
+                    // Handle any error during the AJAX request
+                    console.error("Error:", xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
 
 {% endblock %}

@@ -1,0 +1,14 @@
+<h2>Available Coupons</h2>
+<ul>
+    {% for coupon in coupons %}
+        <li>
+            <strong>{{ coupon.name }}</strong><br>
+            Code: {{ coupon.code }}<br>
+            Discount: {{ coupon.discount_percentage }}% (Max ₹{{ coupon.max_discount_amount }})<br>
+            Minimum Order: ₹{{ coupon.minimum_order_amount }}<br>
+            Expires on: {{ coupon.expiry_date|date:"d M Y, H:i" }}
+        </li>
+    {% empty %}
+        <p>No active coupons available.</p>
+    {% endfor %}
+</ul>

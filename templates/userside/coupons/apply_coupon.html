@@ -1,0 +1,27 @@
+<form id="applyCouponForm" method="POST" action="{% url 'apply_coupon' %}">
+  {% csrf_token %}
+  <input type="text" name="coupon_code" placeholder="Enter coupon code" required>
+  <input type="hidden" name="order_amount" value="1000"> <!-- Replace with dynamic order amount -->
+  <button type="submit">Apply Coupon</button>
+</form>
+
+<div id="couponMessage"></div>
+
+<script>
+  document.getElementById('applyCouponForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      const response = await fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: {'X-Requested-With': 'XMLHttpRequest'},
+      });
+      const data = await response.json();
+      const messageDiv = document.getElementById('couponMessage');
+      if (data.success) {
+          messageDiv.textContent = `Coupon applied! Discount: ₹${data.discount}`;
+      } else {
+          messageDiv.textContent = data.message;
+      }
+  });
+</script>

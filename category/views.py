@@ -6,13 +6,22 @@ from adminpanel.decorators import admin_required
 
 # Create your views here.
 
+
+
 @admin_required
 def create_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            form.save()  
-            return redirect('category:listcategory') 
+         
+            category_name = form.cleaned_data['category_name'].strip()
+            
+            
+            if Category.objects.filter(category_name__iexact=category_name).exists():
+                messages.error(request, 'A category with this name already exists.')
+            else:
+                form.save()  
+                return redirect('category:listcategory')
     else:
         form = CategoryForm()
     return render(request, 'adminside/category/category.html', {'form': form})

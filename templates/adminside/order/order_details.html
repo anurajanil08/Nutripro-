@@ -1,0 +1,178 @@
+{% extends "adminside/base.html" %}
+{% load static %}
+
+{% block title %}
+<title>Order Details</title>
+{% endblock title %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="content-title card-title mb-0">Order Details</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Order Summary -->
+            <h5 class="mb-4">Order Summary</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Order ID</th>
+                        <td>{{ order.order_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>User</th>
+                        <td>{{ order.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Order Date</th>
+                        <td>{{ order.date|date:"d M Y, H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <span class="badge {% if order.order_status == 'Pending' %}bg-warning{% elif order.order_status == 'Delivered' %}bg-success{% elif order.order_status == 'Canceled' %}bg-danger{% else %}bg-info{% endif %}">
+                                {{ order.get_order_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Total Amount</th>
+                        <td>₹{{ order.total_amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Discount Amount</th>
+                        <td>₹{{ order.discount_amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Final Amount</th>
+                        <td>₹{{ order.final_amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Status</th>
+                        <td>
+                            {% if order.payment_status %}
+                                <span style="color: green;">Paid</span>
+                            {% else %}
+                                <span style="color: red;">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Ordered Products -->
+            <h5 class="mt-4 mb-4">Ordered Products</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>size</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.variant.Product.Product_name }}</td>
+                        <td>{{ item.variant.size }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price }}</td>
+                        <td>₹{{ item.total_cost }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Delivery Address -->
+            <h5 class="mt-4 mb-4">Delivery Address</h5>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ order.address.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Street Address</th>
+                        <td>{{ order.address.house_name }}, {{ order.address.street_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>District</th>
+                        <td>{{ order.address.district }}</td>
+                    </tr>
+                    <tr>
+                        <th>State</th>
+                        <td>{{ order.address.state }}</td>
+                    </tr>
+                    <tr>
+                        <th>Country</th>
+                        <td>{{ order.address.country }}</td>
+                    </tr>
+                    <tr>
+                        <th>Pin Number</th>
+                        <td>{{ order.address.pin_number }}</td>
+                    </tr>
+                    <tr>
+                        <th>Phone Number</th>
+                        <td>{{ order.address.phone_number }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4">
+                {% if order.order_status != 'Delivered' %}
+                    <a href="{% url 'order:update_order_status' order.id %}" class="btn btn-sm btn-primary">Update Status</a>
+                {% endif %}
+                <a href="{% url 'order:admin_order_list' %}" class="btn btn-sm btn-secondary">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .card-body {
+        padding: 20px;
+    }
+    .table {
+        width: 100%;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+    .table th, .table td {
+        padding: 10px;
+        text-align: left;
+    }
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd;
+    }
+    .badge {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+    .btn {
+        margin: 0 5px;
+        padding: 10px 15px;
+        font-size: 1rem;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+    }
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+    }
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock content %}

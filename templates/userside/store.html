@@ -292,10 +292,8 @@
 <div id="breadcrumb" class="section">
     <div class="container">
         <ul class="breadcrumb-tree">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">All Categories</a></li>
-            <li><a href="#">POWDER</a></li>
-            <li class="active">WHEY</li>
+            <li><a href="#">HOME</a></li>
+            <li><a href="#">SHOP PAGE</a></li>
         </ul>
     </div>
 </div>
@@ -307,165 +305,135 @@
         <div class="row">
             <!-- ASIDE -->
             <div id="aside" class="col-md-3">
-                <!-- aside Widget -->
+                <!-- Categories Filter -->
                 <div class="aside">
                     <h3 class="aside-title">Categories</h3>
                     <div class="checkbox-filter">
-                        <div class="input-checkbox">
-                            <input type="checkbox" id="category-1">
-                            <label for="category-1">
-                                <span></span>
-                                POWDER
-                                <small>(120)</small>
-                            </label>
-                        </div>
-                        <div class="input-checkbox">
-                            <input type="checkbox" id="category-2">
-                            <label for="category-2">
-                                <span></span>
-                                BARS
-                                <small>(740)</small>
-                            </label>
-                        </div>
+                        {% for category in categories %}
+                            <div class="input-checkbox">
+                                <input type="checkbox" class="category-checkbox" id="category-{{ category.id }}" value="{{ category.category_name }}" onchange="filterProducts()">
+                                <label for="category-{{ category.id }}">
+                                    <span></span>
+                                    {{ category.category_name }}
+                                    <small>({{ category.product_count }})</small>
+                                </label>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <!-- /aside Widget -->
-
-                <!-- aside Widget -->
-                <div class="aside">
-                    <h3 class="aside-title">Price</h3>
-                    <div class="price-filter">
-                        <div id="price-slider"></div>
-                        <div class="input-number price-min">
-                            <input id="price-min" type="number">
-                            <span class="qty-up">+</span>
-                            <span class="qty-down">-</span>
-                        </div>
-                        <span>-</span>
-                        <div class="input-number price-max">
-                            <input id="price-max" type="number">
-                            <span class="qty-up">+</span>
-                            <span class="qty-down">-</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- /aside Widget -->
-
-                <!-- aside Widget -->
+                <!-- Brands Filter -->
                 <div class="aside">
                     <h3 class="aside-title">Brand</h3>
                     <div class="checkbox-filter">
-                        <div class="input-checkbox">
-                            <input type="checkbox" id="brand-1">
-                            <label for="brand-1">
-                                <span></span>
-                                MASS GAINER
-                                <small>(578)</small>
-                            </label>
-                        </div>
-                        <div class="input-checkbox">
-                            <input type="checkbox" id="brand-2">
-                            <label for="brand-2">
-                                <span></span>
-                                ULTIMATE NUTRITION
-                                <small>(125)</small>
-                            </label>
-                        </div>
+                        {% for brand in brands %}
+                            <div class="input-checkbox">
+                                <input type="checkbox" class="brand-checkbox" id="brand-{{ brand.id }}" value="{{ brand.brand_name }}" onchange="filterProducts()">
+                                <label for="brand-{{ brand.id }}">
+                                    <span></span>
+                                    {{ brand.brand_name }}
+                                    <small>({{ brand.product_count }})</small>
+                                </label>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <!-- /aside Widget -->
+                <!-- Price Filter -->
+                <div class="aside">
+                    <h3 class="aside-title">Price</h3>
+                    <div class="price-filter">
+                        <input type="number" class="price-range-min" placeholder="Min Price" onchange="filterProducts()" />
+                        <span>-</span>
+                        <input type="number" class="price-range-max" placeholder="Max Price" onchange="filterProducts()" />
+                    </div>
+                </div>
             </div>
             <!-- /ASIDE -->
 
             <!-- STORE -->
             <div id="store" class="col-md-9">
-                <!-- store top filter -->
+                <!-- Store Top Filter -->
                 <div class="store-filter clearfix">
                     <div class="store-sort">
                         <label>
                             Sort By:
-                            <select class="input-select">
-                                <option value="0">Popular</option>
-                                <option value="1">Position</option>
-                            </select>
-                        </label>
-                        <label>
-                            Show:
-                            <select class="input-select">
-                                <option value="0">20</option>
-                                <option value="1">50</option>
+                            <select class="input-select" onchange="filterProducts()">
+                                <option value="popularity">Popularity</option>
+                                <option value="price_low_high">Price: Low to High</option>
+                                <option value="price_high_low">Price: High to Low</option>
+                                <option value="average_ratings">Average Ratings</option>
+                                <option value="new_arrivals">New Arrivals</option>
+                                <option value="a_to_z">A - Z</option>
+                                <option value="z_to_a">Z - A</option>
                             </select>
                         </label>
                     </div>
-                    <ul class="store-grid">
-                        <li class="active"><i class="fa fa-th"></i></li>
-                        <li><a href="#"><i class="fa fa-th-list"></i></a></li>
-                    </ul>
                 </div>
-                <!-- /store top filter -->
+                <!-- /Store Top Filter -->
 
-                <!-- store products -->
-                <div class="product-grid">
-                    {% for item in product_data %}
-                    <div class="product-card">
-                        <div class="product-image">
-                            {% if item.images.exists %}
-                            <a href="{% url 'product:product-detail-page' item.product.id %}" class="product-link">
-                            <img src="{{ item.images.first.images.url }}" alt="{{ item.product.Product_name }}">
-                            {% else %}
-                            
-                            <img src="{% static 'userside/img/default-product.png' %}" alt="Default Image">
-                            {% endif %}
-                            <div class="product-label">
-                                {% if item.product.is_on_sale %}
-                                <span class="sale">-{{ item.product.discount_percentage }}%</span>
-                                {% endif %}
-                                {% if item.product.is_new %}
-                                <span class="new">NEW</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-category">{{ item.product.Product_category.category_name }}</p>
-                            <h3 class="product-name"><a href="#">{{ item.product.Product_name }}</a></h3>
-                            <h4 class="product-price">₹{{ item.product.offer_price }}
-                                <del class="product-old-price">₹{{ item.product.price }}</del>
-                            </h4>
-                            <div class="product-rating">
-                                {% for i in "12345" %}
-                                <i class="fa fa-star"></i>
-                                {% endfor %}
-                            </div>
-                            <div class="product-btns">
-                                <button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-                                <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-                                <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-                            </div>
-                        </div>
-                        <div class="add-to-cart">
-                            <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <!-- Product Grid -->
+                <div class="product-grid" id="product-grid">
+                    {% include 'userside/product_grid.html' %}
                 </div>
-                <!-- /store products -->
-
-                <!-- store bottom filter -->
-                <div class="store-filter clearfix">
-                    <span class="store-qty">Showing 20-100 products</span>
-                    <ul class="store-pagination">
-                        <li class="active"><span>1</span></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#">3</a></li>
-                        <li><a href="#">4</a></li>
-                        <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                    </ul>
-                </div>
-                <!-- /store bottom filter -->
+                <!-- /Product Grid -->
             </div>
             <!-- /STORE -->
         </div>
     </div>
 </div>
 <!-- /SECTION -->
+
+<!-- JavaScript for filtering products -->
+<script>
+    function filterProducts() {
+            const selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+            const selectedBrands = Array.from(document.querySelectorAll('.brand-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+            const minPrice = document.querySelector('.price-range-min').value;
+            const maxPrice = document.querySelector('.price-range-max').value;
+            const sortOrder = document.querySelector('.input-select').value;
+            const searchQuery = document.querySelector('#search-input').value.trim(); // Get search query
+
+            // Using URLSearchParams for better parameter management
+            const params = new URLSearchParams();
+            
+            if (selectedCategories.length > 0) params.append('category', selectedCategories.join(','));
+            if (selectedBrands.length > 0) params.append('brand', selectedBrands.join(','));
+            if (minPrice) params.append('min_price', minPrice);
+            if (maxPrice) params.append('max_price', maxPrice);
+            if (sortOrder) params.append('sort_by', sortOrder);
+            if (searchQuery) params.append('search', searchQuery); // Add search query
+
+            // Fetch the filtered product data
+            fetch(`{% url 'accounts:shop-ajax' %}?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                    document.getElementById('product-grid').innerHTML = data.html;
+            })
+            .catch(error => console.error('Error filtering products:', error));
+    }
+
+    // Trigger search when the user presses "Enter" in the search input
+    document.querySelector('#search-input').addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent form submission
+                    filterProducts();
+            }
+    });
+
+    // Trigger filtering when the search button is clicked
+    document.querySelector('.search-btn').addEventListener('click', filterProducts);
+</script>
+
+
+
+	
+
+        	
+
+
+
+
 {% endblock %}

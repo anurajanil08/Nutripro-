@@ -63,6 +63,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'cart',
+    'order',
+    'wallet',
+    'coupons',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +77,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'nutri_auth.middleware.ActiveUserMiddleware',
 ]
 
 ROOT_URLCONF = 'Nutripro.urls'
@@ -133,6 +137,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -188,6 +193,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 
 
+
+
+
 LOGIN_REDIRECT_URL = "/"  
 LOGOUT_REDIRECT_URL = "/"
 
@@ -203,3 +211,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
+
+
+RAZORPAY_KEY_ID ='rzp_test_pivLgaoefs64oW'
+
+RAZORPAY_KEY_SECRET ='1LMKFhvMETUlcY5f1rf1t8Jf'

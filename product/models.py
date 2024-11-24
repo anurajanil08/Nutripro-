@@ -1,10 +1,11 @@
 from django.db import models
-from category.models import Category  
-from brand.models import Brand  
+from category.models import Category
+from brand.models import Brand
 from nutri_auth.models import User
 
 
 # Create your models here.
+
 
 class Product(models.Model):
     Product_name = models.CharField(max_length=100, null=False)
@@ -28,10 +29,19 @@ class Product(models.Model):
 
 class ProductVariant(models.Model):
     Product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    size = models.CharField(max_length=10, null=True) 
+    size = models.CharField(max_length=10, null=True)
     stock = models.BigIntegerField(null=False, default=0)
     variant_status = models.BooleanField(default=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  
+
+    def percentage_discount(self):
+        return int(((self.price - self.offer_price) / self.price) * 100)
+    
+
+    def is_in_stock(self):
+        return self.stock > 0
+
     def __str__(self):
         return f"{self.Product.Product_name} - {self.size}"
 
@@ -46,7 +56,9 @@ class ProductImages(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    Product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    Product = models.ForeignKey(
+        Product, related_name="reviews", on_delete=models.CASCADE
+    )
     rating = models.IntegerField()
     comment = models.TextField(max_length=500)
 
@@ -54,4 +66,3 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.Product.Product_name}"
-

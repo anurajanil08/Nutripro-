@@ -12,11 +12,12 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from .signals import otp_signal
-
-
-
-
-
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.contrib.auth.forms import SetPasswordForm
+from django.utils.http import urlsafe_base64_decode
 # Create your views here.
 
 
@@ -46,26 +47,34 @@ def signup(request):
             return redirect('nutri_auth:verify-otp')
 
     else:
-        form = UserCreationForm()
+        form = UserCreationForm(request.POST or None)
 
     return render(request, 'authentication/signup.html', {'form': form})
 
 
 def verify_otp(request):
     if request.method == 'POST':
+        print("hi post")
         entered_otp = request.POST.get('otp')
         temp_user_data = request.session.get('temp_user_data')
-
-        if temp_user_data:
+        print("entered_otp", entered_otp)
+        
+        if not temp_user_data:
+            messages.error(request, 'Registration session expired. Please register again.')
+            return redirect('nutri_auth:register')  
+        
+        try:
             otp_generated_time = timezone.datetime.fromisoformat(temp_user_data['otp_generated_time'])
             current_time = timezone.now()
-
+            
+            
             if current_time > otp_generated_time + timedelta(minutes=2):
-                return render(request, 'authentication/otp.html', {
-                    'error': 'OTP has expired. Please request a new one.',
-                })
-
-            if entered_otp == temp_user_data['otp']:
+                messages.error(request, 'OTP has expired. Please request a new one.')
+                return render(request, 'userside/verification-otp.html')  
+            print("otp verify")
+            print("temp_user_data['otp']", temp_user_data['otp'])
+            if int(entered_otp) == int(temp_user_data['otp']):
+                print("hi otp")
                 user = User(
                     email=temp_user_data['email'],
                     username=temp_user_data['username'],
@@ -75,14 +84,18 @@ def verify_otp(request):
                 user.save()
 
                 del request.session['temp_user_data']
+
                 login(request, user)
-
+                messages.success(request, 'Registration successful! Welcome aboard!')
                 return redirect('accounts:index')
-
-            return render(request, 'authentication/otp.html', {
-                'error': 'Invalid OTP. Please try again.',
-            })
-
+            else:
+                messages.error(request, 'Invalid OTP. Please try again.')
+                return render(request, 'userside/verification-otp.html')  
+                
+        except Exception as e:
+            messages.error(request, 'An error occurred. Please try again.')
+            return render(request, 'authentication/otp.html')  
+      
     return render(request, 'authentication/otp.html')
 
 
@@ -118,7 +131,6 @@ def resend_otp(request):
 
 
 def handlelogin(request):
-
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -135,7 +147,6 @@ def handlelogin(request):
     else:
         form = LoginForm()
 
-
     return render(request, "authentication/login.html", {'form': form})
 
 
@@ -147,3 +158,71 @@ def logout_view(request):
     return redirect('nutri_auth:handlelogin') 
 
 
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        
+        try:
+            user = User.objects.get(email=email)
+            # Generate a password reset token
+            subject = "Password Reset Requested"
+            email_template_name = "authentication/reset_email.txt"
+            
+            # Fetch domain and protocol dynamically
+            domain = request.get_host()
+            protocol = 'https' if request.is_secure() else 'http'
+            
+            c = {
+                "email": user.email,
+                'domain': domain,
+                'site_name': 'NUTRI PRO',
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                'token': default_token_generator.make_token(user),
+                'protocol': protocol,
+            }
+            
+            # Render email content
+            email_content = render_to_string(email_template_name, c)
+            
+            # Send the email
+            send_mail(
+                subject,
+                email_content,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+
+            # Success message
+            messages.success(request, "A password reset email has been sent to your email address.")
+            return redirect('nutri_auth:handlelogin')  # You may want to adjust this redirection
+            
+        except User.DoesNotExist:
+            # If user does not exist
+            messages.error(request, "No user found with this email address.")
+            return redirect('nutri_auth:forgot_password')
+
+    # Render forgot password page for GET request
+    return render(request, 'authentication/forgot_password.html')
+
+def reset_password(request, uidb64, token):
+    try:
+        user_id = force_bytes(urlsafe_base64_decode(uidb64)).decode()
+        user = User.objects.get(pk=user_id)
+    except (User.DoesNotExist, ValueError, TypeError):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Your password has been reset successfully!")
+                return redirect('nutri_auth:login')
+        else:
+            form = SetPasswordForm(user)
+        return render(request, 'authentication/reset_password.html', {'form': form})
+    else:
+        messages.error(request, "The password reset link is invalid or has expired.")
+        return redirect('nutri_auth:forgot_password')

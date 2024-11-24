@@ -1,0 +1,339 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-color: #2B2D42;
+        --accent-color: #D10024;
+        --text-color: #333;
+        --border-color: #E4E7ED;
+        --hover-opacity: 0.9;
+    }
+
+    /* Dashboard Container */
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .user-welcome {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 400;
+        margin: 0.5rem 0 0 0;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        height: calc(100vh - 200px);
+        position: sticky;
+        top: 2rem;
+    }
+
+    /* Navigation Links */
+    .nav-link {
+        padding: 1rem 1.5rem;
+        color: var(--primary-color);
+        border-radius: 40px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        background: transparent;
+    }
+
+    .nav-link i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .nav-link:hover {
+        color: var(--accent-color);
+        background: rgba(209, 0, 36, 0.05);
+        transform: translateX(5px);
+    }
+
+    .nav-link.active {
+        background: var(--accent-color);
+        color: white;
+        font-weight: 700;
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(209, 0, 36, 0.2);
+    }
+
+    .nav-link.active:hover {
+        opacity: var(--hover-opacity);
+        color: white;
+    }
+
+    /* Content Area */
+    .content-area {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Order List Styles */
+    .order-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .order-text {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .order-details-box {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .order-details-box p {
+        margin: 0.5rem 0;
+        color: var(--text-color);
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-paid {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+        color: var(--primary-color);
+    }
+
+    /* Buttons */
+    .btn-dashboard {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 40px;
+        color: #FFF;
+        text-transform: uppercase;
+        font-weight: 700;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-dashboard:hover {
+        opacity: var(--hover-opacity);
+        color: #FFF;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(209, 0, 36, 0.2);
+    }
+
+    .btn-view {
+        display: inline-block;
+        padding: 8px 20px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-view:hover {
+        opacity: var(--hover-opacity);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        display: inline-block;
+        padding: 8px 20px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-danger:hover {
+        opacity: var(--hover-opacity);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(209, 0, 36, 0.2);
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            margin: 1rem auto;
+        }
+        
+        .sidebar {
+            height: auto;
+            margin-bottom: 1rem;
+            position: static;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .order-actions {
+            flex-direction: column;
+        }
+        
+        .btn-dashboard,
+        .btn-view,
+        .btn-danger {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">ORDER</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <a href="{% url 'accounts:dash' %}" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="{% url 'order:order_list' %}" class="nav-link active">
+                    <i class="fas fa-shopping-bag"></i>
+                    My Orders
+                </a>
+                <a href="{% url 'accounts:manage_addresses' %}" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Addresses
+                </a>
+                <a href="{% url 'wallet:wallet_detail'%}" class="nav-link">
+                    <i class="fas fa-credit-card"></i>
+                    Wallet
+                </a>
+                <a href="#help" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Help & Support
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="content-area">
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-card">
+                        <div class="order-text">
+                            <strong>Order ID:</strong> {{ order.order_id }} <br>
+                            <strong>Date:</strong> {{ order.date|date:"d M Y, h:i A" }} <br>
+                            <strong>Total Amount:</strong> ₹{{ order.total_amount }} <br>
+                            <strong>Discount:</strong> ₹{{ order.discount_amount }} <br>
+                            <strong>Final Amount:</strong> ₹{{ order.final_amount }} <br>
+                            <strong>Payment Status:</strong> 
+                            {% if order.payment_status %}
+                                <span class="status-badge status-paid">Paid</span>
+                            {% else %}
+                                <span class="status-badge status-pending">Pending</span>
+                            {% endif %} <br>
+                            <strong>Status:</strong> {{ order.order_status }}
+                        </div>
+
+                        <div class="order-details-box">
+                            <p><strong>Shipping Address:</strong> {{ order.address.name }}, {{ order.address.house_name }}, {{ order.address.street_name }}, {{ order.address.district }}</p>
+                            <p><strong>Payment Method:</strong> {{ order.payment_option }}</p>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <a href="" class="btn-view">View Details</a>
+                            {% if order.order_status == 'Pending' or order.order_status == 'Awaiting Payment' %}
+                            <form action="{% url 'order:cancel_order' order.id %}" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Cancel Order</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="order-card">
+                        <div class="order-text text-center">
+                            <i class="fas fa-shopping-bag" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <p>No orders available.</p>
+                            <a href="{% url 'shop:product_list' %}" class="btn-view">Start Shopping</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,55 +1,95 @@
 {% extends 'adminside/base.html' %}
 
 {% block title %}
-<a class="navbar-brand" href="#">Create Product</a>
+    <a class="navbar-brand" href="#">Create Product</a>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Create a New Product</h1>
+    <h1 class="mb-4">Create a New Product</h1>
 
     <!-- Form to create a product -->
-    <form method="POST" class="mt-4">
+    <form method="POST" class="p-4 border rounded shadow-sm bg-light">
         {% csrf_token %}
-        <div class="form-group mb-3">
-            <label for="product_name">Product Name:</label>
-            <input type="text" name="product_name" id="product_name" class="form-control" required>
+        
+        <div class="form-group mb-4">
+            <label for="product_name" class="form-label">Product Name:</label>
+            <input 
+                type="text" 
+                name="product_name" 
+                id="product_name" 
+                class="form-control" 
+                placeholder="Enter product name" 
+                required
+            >
         </div>
 
-        <div class="form-group mb-3">
-            <label for="description">Description:</label>
-            <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+        <div class="form-group mb-4">
+            <label for="description" class="form-label">Description:</label>
+            <textarea 
+                name="description" 
+                id="description" 
+                class="form-control" 
+                rows="4" 
+                placeholder="Enter product description"
+            ></textarea>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="price">Price:</label>
-            <input type="number" name="price" id="price" class="form-control" required>
+        <div class="form-group mb-4">
+            <label for="price" class="form-label">Price:</label>
+            <input 
+                type="number" 
+                name="price" 
+                id="price" 
+                class="form-control" 
+                placeholder="Enter price" 
+                required
+            >
         </div>
 
-        <div class="form-group mb-3">
-            <label for="category">Category:</label>
-            <select name="category" id="category" class="form-control" required>
+        <div class="form-group mb-4">
+            <label for="category" class="form-label">Category:</label>
+            <select 
+                name="category" 
+                id="category" 
+                class="form-control" 
+                required
+            >
                 <option value="">Select a category</option>
-                <!-- Add options dynamically from your categories -->
                 {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.category_name }}</option>
+                    <option value="{{ category.id }}">
+                        {{ category.category_name }}
+                    </option>
                 {% endfor %}
             </select>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="status">Status:</label>
-            <select name="status" id="status" class="form-control">
+        <div class="form-group mb-4">
+            <label for="status" class="form-label">Status:</label>
+            <select 
+                name="status" 
+                id="status" 
+                class="form-control"
+            >
                 <option value="true">Active</option>
                 <option value="false">Inactive</option>
             </select>
         </div>
 
         <!-- Create Product button -->
-        <button type="submit" class="btn btn-success">Create Product</button>
+        <div class="text-end">
+            <button type="submit" class="btn btn-success px-4">Create Product</button>
+        </div>
     </form>
 
     <!-- Back link -->
-    <a href="{% url 'product:product' %}" class="btn btn-secondary mt-3">Back to Product List</a>
+    <div class="mt-4">
+        <a 
+            href="{% url 'product:product' %}" 
+            class="btn btn-secondary px-4"
+        >
+            Back to Product List
+        </a>
+    </div>
 </div>
 {% endblock %}

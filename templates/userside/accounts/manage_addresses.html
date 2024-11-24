@@ -1,0 +1,323 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-color: #2B2D42;
+        --accent-color: #D10024;
+        --text-color: #333;
+        --border-color: #E4E7ED;
+        --hover-opacity: 0.9;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .dashboard-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        height: calc(100vh - 200px);
+        position: sticky;
+        top: 2rem;
+    }
+
+    .nav-link {
+        padding: 1rem 1.5rem;
+        color: var(--primary-color);
+        border-radius: 40px;
+        margin-bottom: 0.5rem;
+        transition: 0.2s all;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+    }
+
+    .nav-link:hover {
+        color: var(--accent-color);
+        background: rgba(209, 0, 36, 0.05);
+    }
+
+    .nav-link.active {
+        background: var(--accent-color);
+        color: white;
+        font-weight: 700;
+    }
+
+    .content-area {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-add-address {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+        border: none;
+        transition: 0.2s all;
+        cursor: pointer;
+        background-color: var(--accent-color);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add-address:hover {
+        background-color: rgba(209, 0, 36, var(--hover-opacity));
+    }
+
+    .btn-add-address .fas {
+        font-size: 0.8rem; /* Adjust the size as needed */
+    }
+
+    .address-card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: 0.2s all;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .address-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .address-text {
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+
+    .btn-delete {
+        padding: 8px 20px;
+        background-color: transparent;
+        border: 2px solid var(--accent-color);
+        border-radius: 40px;
+        color: var(--accent-color);
+        font-weight: 600;
+        transition: 0.2s all;
+    }
+
+    .btn-delete:hover {
+        background-color: var(--accent-color);
+        color: #FFF;
+    }
+
+    .modal-content {
+        border-radius: 8px;
+    }
+
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-title {
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            margin: 1rem auto;
+        }
+        
+        .sidebar {
+            height: auto;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .address-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .address-text {
+        font-size: 1rem;
+        color: #495057;
+        margin-bottom: 15px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px; /* Space between buttons */
+        justify-content: flex-start; /* Align buttons to the left */
+    }
+
+    .btn-edit, .btn-delete {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .btn-edit {
+        background-color: #007bff; /* Blue color for edit */
+    }
+
+    .btn-delete {
+        background-color: #dc3545; /* Red color for delete */
+    }
+
+    .btn-edit:hover, .btn-delete:hover {
+        opacity: 0.8;
+    }
+
+    .btn-delete {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+}
+
+
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Manage Addresses </h1>
+        <a href="{% url 'accounts:add_address' %}" class="btn-add-address">
+            <i class="fas fa-plus"></i> Add New Address
+        </a>
+        
+    </div>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="sidebar">
+                <a href="{% url 'accounts:dash' %}" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="{% url 'order:order_list' %}" class="nav-link">
+                    <i class="fas fa-shopping-bag"></i>
+                    My Orders
+                </a>
+                <a href="{% url 'accounts:manage_addresses' %}" class="nav-link active">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Addresses
+                </a>
+                <a href="{% url 'wallet:wallet_detail'%}" class="nav-link">
+                    <i class="fas fa-credit-card"></i>
+                    Wallet
+                </a>
+                <a href="#help" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Help & Support
+                </a>
+            </div>
+        </div>
+
+        <!-- Address List -->
+        <div class="col-md-9">
+            <div class="content-area">
+                {% if addresses %}
+                    {% for address in addresses %}
+                    <div class="address-card">
+                        <div class="address-text">{{ address }}</div>
+                        <div class="button-group">
+                            <form method ="POST" action="{% url 'accounts:edit_address' address.id %}">
+                                         {% csrf_token %}
+                            <button type="submit" class="btn-edit">Edit</button>
+                            </form>    
+                            <form id="deleteAddressForm{{ address.id }}" method="POST" action="{% url 'accounts:delete_address' address.id %}">
+                                {% csrf_token %}
+                                <button type="button" class="btn-delete" onclick="confirmDelete({{ address.id }})">Delete</button>
+                            </form>
+                            
+
+                        </div>
+                    </div>
+                    
+
+                    
+                    {% endfor %}
+                {% else %}
+                    <div class="address-card">
+                        <div class="address-text text-center">No addresses available.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(addressId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+                document.getElementById(`deleteAddressForm${addressId}`).submit();
+            }
+        });
+    }
+</script>
+
+
+{% endblock %}

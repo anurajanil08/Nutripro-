@@ -1,0 +1,54 @@
+{% extends 'adminside/base.html' %}
+{% block content %}
+<h1>Coupons</h1>
+<a href="{% url 'coupons:create_coupon' %}" class="btn btn-primary">Create Coupon</a>
+
+
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Minimum Amount</th>
+            <th>Discount</th>
+            <th>Expiry Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for coupon in coupons %}
+        <tr>
+            <td>{{ coupon.id }}</td>
+            <td>{{ coupon.name }}</td>
+            <td>{{ coupon.code }}</td>
+            <td>{{ coupon.minimum_order_amount }}</td>
+            <td>{{ coupon.discount_amount }}</td>
+            <td>{{ coupon.expiry_date }}</td>
+            <td>
+              {% if coupon.is_active %}
+                  <span class="badge rounded-pill bg-success px-3 py-2 text-light">
+                      <i class="bi bi-check-circle"></i> Active
+                  </span>
+              {% else %}
+                  <span class="badge rounded-pill bg-danger px-3 py-2 text-light">
+                      <i class="bi bi-x-circle"></i> Inactive
+                  </span>
+              {% endif %}
+          </td>
+            <td>
+                <a href="{% url 'coupons:edit_coupon' coupon.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="{% url 'coupons:toggle_coupon_status' coupon.id %}" method="POST" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">
+                      {% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+              </form>              
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

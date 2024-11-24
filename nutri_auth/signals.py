@@ -15,7 +15,7 @@ def handle_otp_signal(sender, **kwargs):
     email = user_data.get('email')
 
     otp = generate_otp()
-    print(otp)
+
 
     user_data['otp'] = otp
     user_data['otp_generated_time'] = timezone.now().isoformat()

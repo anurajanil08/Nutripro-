@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .wishlist-item:last-child {
+            border-bottom: none;
+        }
+        .wishlist-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .wishlist-details {
+            flex: 1;
+            margin-left: 15px;
+        }
+        .wishlist-details h3 {
+            margin: 0;
+            color: #555;
+        }
+        .wishlist-details p {
+            margin: 5px 0 0;
+            color: #777;
+        }
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+        .empty-message {
+            text-align: center;
+            color: #888;
+            font-size: 18px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Wishlist</h1>
+        
+        {% if wishlist_items %}
+            {% for item in wishlist_items %}
+                <div class="wishlist-item">
+                    <img src="{{ item.variant.Product.image.url }}" alt="{{ item.variant.Product.Product_name }}">
+                    <div class="wishlist-details">
+                        <h3>{{ item.variant.Product.Product_name }}</h3>
+                        <p>Size: {{ item.variant.size }}</p>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromWishlist({{ item.variant.id }})">Remove</button>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">Your wishlist is empty!</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function removeFromWishlist(variantId) {
+            fetch(`/wishlist/remove/${variantId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload(); 
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
+

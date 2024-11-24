@@ -1,0 +1,284 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-color: #2B2D42;
+        --accent-color: #D10024;
+        --text-color: #333;
+        --border-color: #E4E7ED;
+        --hover-opacity: 0.9;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .dashboard-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .user-welcome {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 400;
+    }
+
+    .sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        height: calc(100vh - 200px);
+        position: sticky;
+        top: 2rem;
+    }
+
+    .nav-link {
+        padding: 1rem 1.5rem;
+        color: var(--primary-color);
+        border-radius: 40px;
+        margin-bottom: 0.5rem;
+        transition: 0.2s all;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+    }
+
+    .nav-link:hover {
+        color: var(--accent-color);
+        background: rgba(209, 0, 36, 0.05);
+    }
+
+    .nav-link.active {
+        background: var(--accent-color);
+        color: white;
+        font-weight: 700;
+    }
+
+    .nav-link.active:hover {
+        opacity: var(--hover-opacity);
+        color: white;
+    }
+
+    .content-area {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: 0.2s all;
+    }
+
+    .profile-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--accent-color);
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .btn-dashboard {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 40px;
+        color: #FFF;
+        text-transform: uppercase;
+        font-weight: 700;
+        text-align: center;
+        transition: 0.2s all;
+    }
+
+    .btn-dashboard:hover {
+        opacity: var(--hover-opacity);
+        color: #FFF;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        text-align: center;
+        transition: 0.2s all;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        color: var(--text-color);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+
+    .profile-info {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-label {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            margin: 1rem auto;
+        }
+        
+        .sidebar {
+            height: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-section {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Dashboard</h1>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <a href="{% url 'accounts:dash' %}" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="{% url 'order:order_list' %}" class="nav-link">
+                    <i class="fas fa-shopping-bag"></i>
+                    My Orders
+                </a>
+                <a href="{% url 'accounts:manage_addresses' %}" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Addresses
+                </a>
+                <a href="{% url 'wallet:wallet_detail'%}" class="nav-link">
+                    <i class="fas fa-credit-card"></i>
+                    Wallet
+                </a>
+                <a href="#help" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Help & Support
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="content-area">
+                <div class="profile-section">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3>Personal Information</h3>
+                        </div>
+                        <div class="profile-info">
+                            <span class="profile-label">Email:</span>
+                            {{ user.email }}
+                        </div>
+                        <div class="profile-info">
+                            <span class="profile-label">Username:</span>
+                            {{ user.username }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-shopping-cart fa-2x" style="color: var(--accent-color)"></i>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-heart fa-2x" style="color: var(--accent-color)"></i>
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Wishlist Items</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-map-marker-alt fa-2x" style="color: var(--accent-color)"></i>
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Saved Addresses</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

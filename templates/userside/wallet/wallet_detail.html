@@ -1,0 +1,265 @@
+{% extends 'userside/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  :root {
+      --primary-color: #2B2D42;
+      --accent-color: #D10024;
+      --text-color: #333;
+      --border-color: #E4E7ED;
+      --hover-opacity: 0.9;
+  }
+
+  .dashboard-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      font-family: 'Montserrat', sans-serif;
+  }
+
+  .dashboard-header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+  }
+
+  .dashboard-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+  }
+
+  .sidebar {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      height: calc(100vh - 200px);
+      position: sticky;
+      top: 2rem;
+  }
+
+  .nav-link {
+      padding: 1rem 1.5rem;
+      color: var(--primary-color);
+      border-radius: 40px;
+      margin-bottom: 0.5rem;
+      transition: 0.2s all;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-weight: 500;
+  }
+
+  .nav-link:hover {
+      color: var(--accent-color);
+      background: rgba(209, 0, 36, 0.05);
+  }
+
+  .nav-link.active {
+      background: var(--accent-color);
+      color: white;
+      font-weight: 700;
+  }
+
+  .content-area {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  }
+
+  .btn-delete {
+      padding: 8px 20px;
+      background-color: transparent;
+      border: 2px solid var(--accent-color);
+      border-radius: 40px;
+      color: var(--accent-color);
+      font-weight: 600;
+      transition: 0.2s all;
+  }
+
+  .btn-delete:hover {
+      background-color: var(--accent-color);
+      color: #FFF;
+  }
+
+  .modal-content {
+      border-radius: 8px;
+  }
+
+  .modal-header {
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 8px 8px 0 0;
+  }
+
+  .modal-title {
+      color: white;
+  }
+
+  @media (max-width: 768px) {
+      .dashboard-container {
+          margin: 1rem auto;
+      }
+      
+      .sidebar {
+          height: auto;
+          margin-bottom: 1rem;
+      }
+  }
+
+
+  .button-group {
+      display: flex;
+      gap: 10px; /* Space between buttons */
+      justify-content: flex-start; /* Align buttons to the left */
+  }
+
+  .btn-edit, .btn-delete {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+  }
+
+  .btn-edit {
+      background-color: #007bff; /* Blue color for edit */
+  }
+
+  .btn-delete {
+      background-color: #dc3545; /* Red color for delete */
+  }
+
+  .btn-edit:hover, .btn-delete:hover {
+      opacity: 0.8;
+  }
+
+  .btn-delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+.btn-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c9302c;
+}
+.wallet-balance {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.transaction-list {
+  list-style: none;
+  padding: 0;
+}
+
+.transaction-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-card p {
+  margin: 0.5rem 0;
+}
+
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Your Wallet</h1>
+        {% comment %} <a href="{% url 'wallet:add_money' %}" class="btn-add-address">
+            <i class="fas fa-plus"></i> Add Money
+        </a> {% endcomment %}
+    </div>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+          <div class="sidebar">
+              <a href="{% url 'accounts:dash' %}" class="nav-link">
+                  <i class="fas fa-user"></i>
+                  Profile
+              </a>
+              <a href="{% url 'order:order_list' %}" class="nav-link">
+                  <i class="fas fa-shopping-bag"></i>
+                  My Orders
+              </a>
+              <a href="{% url 'accounts:manage_addresses' %}" class="nav-link">
+                  <i class="fas fa-map-marker-alt"></i>
+                  Addresses
+              </a>
+              <a href="{% url 'wallet:wallet_detail'%}" class="nav-link active">
+                <i class="fas fa-credit-card"></i>
+                Wallet
+            </a>
+              <a href="#help" class="nav-link">
+                  <i class="fas fa-question-circle"></i>
+                  Help & Support
+              </a>
+          </div>
+      </div>
+
+        <!-- Wallet Details -->
+<div class="col-md-9">
+  <div class="content-area">
+      <!-- Wallet Balance -->
+      <div class="wallet-balance">
+          <p><strong>Balance:</strong> ₹{{ wallet.balance }}</p>
+      </div>
+
+    <!-- Transactions List -->
+    <h3>Recent Transactions</h3>
+    {% if transactions %}
+        <ul class="transaction-list">
+            {% for transaction in transactions %}
+                <li class="transaction-card">
+                    <p><strong>Date:</strong> {{ transaction.timestamp }}</p>
+                    <p><strong>Amount:</strong> ₹{{ transaction.amount }}</p>
+                    <p><strong>Description:</strong> {{ transaction.description }}</p>
+                    <p><strong>Type:</strong> {{ transaction.get_transaction_type_display }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No transactions available.</p>
+    {% endif %}
+  </div>
+</div>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

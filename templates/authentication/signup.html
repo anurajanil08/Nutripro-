@@ -121,7 +121,7 @@
                 <!-- Email Field -->
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" name="email" id="email" class="form-control" required>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ form.email.value|default:'' }}" required>
                     {% if form.email.errors %}
                         <div class="text-danger">
                             {{ form.email.errors }}
@@ -132,7 +132,7 @@
                 <!-- Username Field -->
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" name="username" id="username" class="form-control" required>
+                    <input type="text" name="username" id="username" class="form-control" value="{{ form.username.value|default:'' }}" required>
                     {% if form.username.errors %}
                         <div class="text-danger">
                             {{ form.username.errors }}

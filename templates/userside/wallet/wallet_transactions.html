@@ -1,0 +1,9 @@
+<h1>Wallet Transactions</h1>
+<ul>
+    {% for transaction in transactions %}
+        <li>
+            {{ transaction.timestamp }} - {{ transaction.get_transaction_type_display }}: {{ transaction.amount }} ({{ transaction.description }})
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'wallet:wallet_detail' %}">Back to Wallet</a>

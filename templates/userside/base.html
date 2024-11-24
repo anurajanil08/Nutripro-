@@ -31,6 +31,12 @@
 		<!-- Custom stlylesheet -->
 		<link type="text/css" rel="stylesheet" href="{% static 'userside/css/style.css' %}"/>
 
+		<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  rel="stylesheet"
+/>
+
+
 		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 		<!--[if lt IE 9]>
@@ -51,7 +57,7 @@
 					<ul class="header-links pull-right">
 							{% if user.is_authenticated %}
 									<!-- Show My Account and Logout if the user is authenticated -->
-									<li><a href="#"><i class="fa fa-user-o"></i> My Account</a></li>
+									<li><a href="{% url 'accounts:dash' %}"><i class="fa fa-user-o"></i> My Account</a></li>
 									<li><a href="{% url 'nutri_auth:logout' %}"><i class="fa fa-sign-out"></i> Log Out</a></li>
 							{% else %}
 									<!-- Show Log In / Sign Up if the user is not authenticated -->
@@ -88,8 +94,10 @@
 										<option value="1">Category 01</option>
 										<option value="1">Category 02</option>
 									</select>
-									<input class="input" placeholder="Search here">
-									<button class="search-btn">Search</button>
+									<form id="product-filter-form">
+										<input class="input" type="text" name="search" placeholder="Search products..." id="search-input">
+										<button type="button" class="search-btn" id="search-button">Search</button>
+									</form>
 								</form>
 							</div>
 						</div>
@@ -100,54 +108,21 @@
 							<div class="header-ctn">
 								<!-- Wishlist -->
 								<div>
-									<a href="#">
+									<a href="{% url 'accounts:wishlist' %}">
 										<i class="fa fa-heart-o"></i>
 										<span>Your Wishlist</span>
-										<div class="qty">2</div>
+										{% comment %} <div class="qty">2</div> {% endcomment %}
 									</a>
 								</div>
 								<!-- /Wishlist -->
 
 								<!-- Cart -->
 								<div class="dropdown">
-									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-										<i class="fa fa-shopping-cart"></i>
-										<span>Your Cart</span>
-										<div class="qty">3</div>
+									<a href="{% url 'cart:view_cart' %}">
+											<i class="fa fa-shopping-cart"></i>
+											<span>Your Cart</span>
+											{% comment %} <div class="qty">1</div>  <!-- Total quantity in the cart --> {% endcomment %}
 									</a>
-									<div class="cart-dropdown">
-										<div class="cart-list">
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="{% static 'userside/./img/product01.png' %}" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">product name goes here</a></h3>
-													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-
-											<div class="product-widget">
-												<div class="product-img">
-													<img src="{% static 'userside/./img/product02.png' %}" alt="">
-												</div>
-												<div class="product-body">
-													<h3 class="product-name"><a href="#">product name goes here</a></h3>
-													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-												</div>
-												<button class="delete"><i class="fa fa-close"></i></button>
-											</div>
-										</div>
-										<div class="cart-summary">
-											<small>3 Item(s) selected</small>
-											<h5>SUBTOTAL: $2940.00</h5>
-										</div>
-										<div class="cart-btns">
-											<a href="#">View Cart</a>
-											<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
-										</div>
-									</div>
 								</div>
 								<!-- /Cart -->
 
@@ -338,6 +313,10 @@
             {% endif %}
         });
     </script>
+		
+	
+	
+	
 
 	</body>
 </html>

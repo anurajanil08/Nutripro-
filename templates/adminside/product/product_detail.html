@@ -1,8 +1,10 @@
 {% extends "adminside/base.html" %}
 {% load static %}
+
 {% block title %} 
 <title>Product Detail</title>
 {% endblock title %}
+
 {% block content %}
 <section class="content-main">
     <div class="content-header">
@@ -16,14 +18,15 @@
             <div class="col-md-1">
                 <div class="thumbnail-list">
                     {% for image in images %}
-                    <img src="{{ image.images.url }}" class="img-fluid img-thumbnail thumbnail-image" alt="Product Image" onclick="swapImage(this)">
+                    <img src="{{ image.images.url }}" class="img-fluid img-thumbnail thumbnail-image" alt="Product Image" 
+                         onclick="swapImage(this, '{{ image.variant_price }}')" data-price="{{ image.variant_price }}">
                     {% endfor %}
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="main-thumbnail mb-3">
                     {% if products.thumbnail %}
-                        <img src="{{ products.thumbnail.url }}" class="img-fluid rounded main-image" alt="{{ products.product_name }}">
+                        <img src="{{ products.thumbnail.url }}" class="img-fluid rounded main-image" alt="{{ products.product_name }}" id="mainImage">
                     {% endif %}
                 </div>
             </div>
@@ -47,7 +50,7 @@
                             <!-- Price -->
                             <tr>
                                 <th scope="row">Price</th>
-                                <td>{{ products.price }}</td>
+                                <td id="priceDisplay">{{ products.price }}</td>
                             </tr>
 
                             <!-- Offer Price -->
@@ -125,6 +128,16 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
+    // Function to handle image swap and update price
+    function swapImage(thumbnail, newPrice) {
+        // Change main image
+        document.getElementById("mainImage").src = thumbnail.src;
+        
+        // Update displayed price
+        document.getElementById("priceDisplay").innerText = newPrice;
+    }
+
+    // Function for status change confirmation
     function confirmStatusChange(currentStatus, productId) {
         const action = currentStatus === 'True' ? 'deactivate' : 'activate';
         Swal.fire({
