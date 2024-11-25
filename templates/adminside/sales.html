@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Sales Report</h1>
+        <p>Total Sales: ${{ total_sales }}</p>
+
+        <!-- Date Filter Form -->
+        <form method="get" class="filter-form">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+            
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+        
+            <label for="month">Month:</label>
+            <select id="month" name="month">
+                <option value="">--Select Month--</option>
+                {% for month, name in months.items %}
+                    <option value="{{ month }}" {% if request.GET.month == month %}selected{% endif %}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <label for="year">Year:</label>
+            <input type="number" id="year" name="year" min="2000" value="{{ request.GET.year }}">
+        
+            <button type="submit">Filter</button>
+        </form>
+
+        <!-- Orders Table -->
+        <table id="sales-table" border="1" class="sales-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Order Status</th>
+                    <th>Total Amount</th>
+                    <th>Final Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.user.username }}</td>
+                            <td>{{ order.date|date:"Y-m-d" }}</td>
+                            <td>{{ order.order_status }}</td>
+                            <td>${{ order.total_amount }}</td>
+                            <td>${{ order.final_amount }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">No orders found for the selected date range.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- Download Buttons -->
+        <div class="download-buttons">
+            <button id="download-pdf" class="btn btn-primary">Download PDF</button>
+            <button id="download-excel" class="btn btn-secondary">Download Excel</button>
+        </div>
+    </div>
+
+    <!-- JavaScript for Download -->
+    <script>
+        // Download Table as PDF
+        document.getElementById('download-pdf').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Extract table
+            const table = document.getElementById('sales-table');
+            const rows = [...table.rows];
+            let y = 10;
+
+            // Add title
+            pdf.text("Sales Report", 105, y, { align: 'center' });
+            y += 10;
+
+            // Add table rows
+            rows.forEach((row, rowIndex) => {
+                const cells = [...row.cells];
+                const rowText = cells.map(cell => cell.innerText).join(" | ");
+                pdf.text(rowText, 10, y);
+                y += 10;
+
+                // Add page if necessary
+                if (y > 280) {
+                    pdf.addPage();
+                    y = 10;
+                }
+            });
+
+            // Save PDF
+            pdf.save("sales_report.pdf");
+        });
+
+        // Download Table as Excel
+        document.getElementById('download-excel').addEventListener('click', function () {
+            const table = document.getElementById('sales-table');
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.table_to_sheet(table);
+            XLSX.utils.book_append_sheet(workbook, sheet, "Sales Report");
+            XLSX.writeFile(workbook, "sales_report.xlsx");
+        });
+    </script>
+
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .filter-form {
+            margin-bottom: 20px;
+        }
+        .filter-form label {
+            margin-right: 10px;
+        }
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .sales-table th, .sales-table td {
+            padding: 10px;
+            text-align: left;
+        }
+        .sales-table th {
+            background-color: #f4f4f4;
+        }
+        .download-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
+</body>
+</html>

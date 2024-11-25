@@ -5,6 +5,8 @@ from django.contrib.auth import login, authenticate
 from .forms import AdminLoginForm
 from django.contrib.auth import logout
 from .decorators import admin_required
+from django.db.models import Sum, F
+from order.models import Order
 
 
 # Create your views here.
@@ -66,5 +68,37 @@ def custom_logout_view(request):
     return redirect('adminpanel:adminlogin')
 
 
-def demo(request):
-  return render(request,"base.html")
+# def demo(request):
+#   return render(request,"base.html")
+
+@admin_required
+def sales_report(request):
+    
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    
+    orders = Order.objects.all()
+
+    
+    if start_date and  end_date:
+        orders = orders.filter(date__range=[start_date, end_date])
+    if month and year:
+        orders = orders.filter(date__month=month, date__year=year)
+    
+    months = {
+        '1': 'January', '2': 'February', '3': 'March', '4': 'April',
+        '5': 'May', '6': 'June', '7': 'July', '8': 'August',
+        '9': 'September', '10': 'October', '11': 'November', '12': 'December'
+    }
+
+    context = {
+        'orders': orders,
+        'months': months
+    }
+    
+
+    return render(request, 'adminside/sales.html', context)
+
+

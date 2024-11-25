@@ -164,11 +164,11 @@ def forgot_password(request):
         
         try:
             user = User.objects.get(email=email)
-            # Generate a password reset token
+            
             subject = "Password Reset Requested"
             email_template_name = "authentication/reset_email.txt"
             
-            # Fetch domain and protocol dynamically
+            
             domain = request.get_host()
             protocol = 'https' if request.is_secure() else 'http'
             
@@ -182,10 +182,10 @@ def forgot_password(request):
                 'protocol': protocol,
             }
             
-            # Render email content
+            
             email_content = render_to_string(email_template_name, c)
             
-            # Send the email
+            
             send_mail(
                 subject,
                 email_content,
@@ -194,17 +194,19 @@ def forgot_password(request):
                 fail_silently=False,
             )
 
-            # Success message
+            
             messages.success(request, "A password reset email has been sent to your email address.")
-            return redirect('nutri_auth:handlelogin')  # You may want to adjust this redirection
+            return redirect('nutri_auth:handlelogin')  
             
         except User.DoesNotExist:
-            # If user does not exist
+            
             messages.error(request, "No user found with this email address.")
             return redirect('nutri_auth:forgot_password')
 
-    # Render forgot password page for GET request
+    
     return render(request, 'authentication/forgot_password.html')
+
+
 
 def reset_password(request, uidb64, token):
     try:
@@ -219,10 +221,14 @@ def reset_password(request, uidb64, token):
             if form.is_valid():
                 form.save()
                 messages.success(request, "Your password has been reset successfully!")
-                return redirect('nutri_auth:login')
+                return redirect('nutri_auth:handlelogin')  
         else:
             form = SetPasswordForm(user)
-        return render(request, 'authentication/reset_password.html', {'form': form})
+        return render(request, 'authentication/reset_password.html', {
+            'form': form,
+            'title': 'Reset Password',
+            'instructions': 'Please enter your new password below.',
+        })
     else:
-        messages.error(request, "The password reset link is invalid or has expired.")
+        messages.error(request, "The password reset link is invalid or has expired. Please request a new one.")
         return redirect('nutri_auth:forgot_password')

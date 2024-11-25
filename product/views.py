@@ -178,7 +178,7 @@ def edit_product(request, product_id):
     brands = Brand.objects.all()
 
     if request.method == "POST":
-        product.product_name = request.POST.get("product_name")
+        product.Product_name = request.POST.get("product_name")
         product.price = request.POST.get("price")
         product.offer_price = request.POST.get("offer_price")
         product.percentage_discount = request.POST.get("percentage_discount")
@@ -271,7 +271,7 @@ def toggle_variant_status(request, variant_id):
     return redirect("product:product_variant", variant.Product.id)
 
 
-# user side product function
+
 def product_detail_page(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     images = ProductImages.objects.filter(Product=product)
@@ -285,16 +285,16 @@ def product_detail_page(request, product_id):
 
     wishlist_variant_ids = Wishlist.objects.filter(user=request.user).values_list('variant_id', flat=True)
 
-    # Default selected variant (e.g., first active variant)
+    
     selected_variant = variants.first()
 
-    # Handle user-selected variant (if passed in GET request)
+    
     variant_id = request.GET.get("variant_id")
     if variant_id:
         try:
             selected_variant = variants.get(id=variant_id)
         except ProductVariant.DoesNotExist:
-            selected_variant = variants.first()  # Fallback to first variant if invalid ID
+            selected_variant = variants.first()  
 
     review_form = ReviewForm()
 

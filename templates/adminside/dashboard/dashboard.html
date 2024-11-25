@@ -2,6 +2,11 @@
 
 {% block title %}
 <a class="navbar-brand" href="">Dashboard</a>
+<div class="button-container">
+    <a href="{% url 'adminpanel:sales' %}">
+        <button>View Sales Report</button>
+    </a>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -159,7 +164,17 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="container">
+                <h1>Welcome to Admin Dashboard</h1>
+                <!-- Other dashboard content -->
+        
+                <!-- Sales Report Button -->
+                {% comment %} <div class="button-container">
+                    <a href="{% url 'adminpanel:sales' %}">
+                        <button>View Sales Report</button>
+                    </a>
+                </div> {% endcomment %}
+            {% comment %} <div class="col-md-6">
                 <div class="card ">
                     <div class="header">
                         <h4 class="title">2015 Sales</h4>
@@ -176,7 +191,7 @@
                             <hr>
                             <div class="stats">
                                 <i class="ti-check"></i> Data information certified
-                            </div>
+                            </div> {% endcomment %}
                         </div>
                     </div>
                 </div>
