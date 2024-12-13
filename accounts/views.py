@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Wishlist
 import json
+from django.contrib import messages
 
 
 # Create your views here.
@@ -26,12 +27,12 @@ def index(request):
     product_data = []
     
     for product in products:
-        variants = ProductVariant.objects.filter(Product=product)
+        first_variant = ProductVariant.objects.filter(Product=product).first()
         images = ProductImages.objects.filter(Product=product)
         
         product_data.append({
             'product': product,
-            'variants': variants,
+            'first_variant': first_variant,
             'images': images
         })
     
@@ -49,12 +50,12 @@ def shop_page(request):
     product_data = []
     
     for product in products:
-        variants = ProductVariant.objects.filter(Product=product)
+        variant = ProductVariant.objects.filter(Product=product).first() 
         images = ProductImages.objects.filter(Product=product)
         
         product_data.append({
             'product': product,
-            'variants': variants,
+            'variant': variant,
             'images': images
         })
     
@@ -180,11 +181,15 @@ def delete_address(request, pk):
 @login_required
 def add_address(request):
     form = UserAddressForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        address = form.save(commit=False)
-        address.user = request.user
-        address.save()
-        return redirect('accounts:manage_addresses')
+    if request.method == 'POST':
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            messages.success(request,"Address added successfully!")
+            return redirect('accounts:manage_addresses')
+        else:
+            messages.error(request,"Address added sucessfully!")    
     return render(request, 'userside/accounts/add_edit_address.html', {'form': form})
 
 @login_required
@@ -206,15 +211,15 @@ def toggle_wishlist(request):
             variant = ProductVariant.objects.get(id=variant_id)
             user = request.user
 
-            # Check if the variant is already in the user's wishlist
+            
             wishlist_item = Wishlist.objects.filter(user=user, variant=variant).first()
 
             if wishlist_item:
-                # If the variant is already in the wishlist, remove it
+                
                 wishlist_item.delete()
                 in_wishlist = False
             else:
-                # If the variant is not in the wishlist, add it
+                
                 Wishlist.objects.create(user=user, variant=variant)
                 in_wishlist = True
 
@@ -229,8 +234,28 @@ def toggle_wishlist(request):
 
 
 
+
 @login_required
 def view_wishlist(request):
-    
-    wishlist_items = Wishlist.objects.filter(user=request.user)
+    wishlist_items = (
+        Wishlist.objects.filter(user=request.user)
+        .select_related('variant__Product')  
+    )
     return render(request, "userside/accounts/wishlist.html", {"wishlist_items": wishlist_items})
+
+
+
+
+#remove
+@login_required
+def remove_from_wishlist(request, variant_id):
+    if request.method == "POST":
+        variant = get_object_or_404(ProductVariant, id=variant_id)
+        wishlist_item = Wishlist.objects.filter(user=request.user, variant=variant).first()
+        
+        if wishlist_item:
+            wishlist_item.delete()
+            return JsonResponse({'success': True, 'message': 'Item removed from wishlist'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Item not found in your wishlist'}, status=404)
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)

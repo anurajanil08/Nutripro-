@@ -217,10 +217,12 @@
                         </a>
                     </h3>
                     <div class="product-price-rating">
-                        <div class="product-price">
-                            <span class="current-price">₹{{ item.product.offer_price }}</span>
-                            <span class="old-price">₹{{ item.product.price }}</span>
-                        </div>
+                        {% if item.first_variant %}
+                        <span class="current-price">₹{{ item.first_variant.offer_price }}</span>
+                        <span class="old-price">₹{{ item.first_variant.price }}</span>
+                    {% else %}
+                        <span class="current-price">Price Not Available</span>
+                    {% endif %}
                         <div class="product-rating">
                             {% for i in "12345" %}
                                 <span class="star">★</span>

@@ -1,172 +1,158 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Report</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+/>
 </head>
 <body>
-    <div class="container">
-        <h1>Sales Report</h1>
-        <p>Total Sales: ${{ total_sales }}</p>
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">Sales Report</h1>
 
-        <!-- Date Filter Form -->
-        <form method="get" class="filter-form">
-            <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
-            
-            <label for="end_date">End Date:</label>
-            <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
-        
-            <label for="month">Month:</label>
-            <select id="month" name="month">
-                <option value="">--Select Month--</option>
-                {% for month, name in months.items %}
-                    <option value="{{ month }}" {% if request.GET.month == month %}selected{% endif %}>
-                        {{ name }}
-                    </option>
+        <!-- Filter Form -->
+        <form
+        method="GET"
+        action="{% url 'adminpanel:sales_report' %}"
+        class="row g-2 align-items-center justify-content-center"
+    >
+        {% csrf_token %}
+        <!-- Start Date -->
+        <div class="col-auto">
+            <label for="start_date" class="form-label mb-0 ml-2">Start Date</label>
+            <input
+                type="date"
+                name="start_date"
+                id="start_date"
+                value="{{ start_date }}"
+                class="form-control"
+            />
+        </div>
+        <!-- End Date -->
+        <div class="col-auto">
+            <label for="end_date" class="form-label mb-0 ml-2">End Date</label>
+            <input
+                type="date"
+                name="end_date"
+                id="end_date"
+                value="{{ end_date }}"
+                class="form-control"
+            />
+        </div>
+        <!-- Month -->
+        <div class="col-auto">
+            <label for="month" class="form-label mb-0 ml-2">Month</label>
+            <select name="month" id="month" class="form-select">
+                <option value="">Select Month</option>
+                {% for key, value in months.items %}
+                <option value="{{ key }}" {% if key == month %}selected{% endif %}>
+                    {{ value }}
+                </option>
                 {% endfor %}
             </select>
-        
-            <label for="year">Year:</label>
-            <input type="number" id="year" name="year" min="2000" value="{{ request.GET.year }}">
-        
-            <button type="submit">Filter</button>
-        </form>
+        </div>
+        <!-- Year -->
+        <div class="col-auto">
+            <label for="year" class="form-label mb-0 ml-2">Year</label>
+            <input
+                type="number"
+                name="year"
+                id="year"
+                value="{{ year }}"
+                class="form-control"
+                min="2000"
+                max="2100"
+            />
+        </div>
+        <!-- Filter Button -->
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary mt-4">Filter</button>
+        </div>
+        <!-- Excel Download -->
+        <div class="col-auto">
+            <button
+                type="submit"
+                name="generate_excel"
+                class="btn btn-success mt-4"
+            >
+                Download Excel
+            </button>
+        </div>
+        <!-- PDF Download -->
+        <div class="col-auto">
+            <button
+                type="submit"
+                name="generate_pdf"
+                class="btn btn-danger mt-4"
+            >
+                Download PDF
+            </button>
+        </div>
+    </form>
+
+        <!-- Filter Summary -->
+     
 
         <!-- Orders Table -->
-        <table id="sales-table" border="1" class="sales-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Order Status</th>
-                    <th>Total Amount</th>
-                    <th>Final Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if orders %}
-                    {% for order in orders %}
-                        <tr>
-                            <td>{{ order.order_id }}</td>
-                            <td>{{ order.user.username }}</td>
-                            <td>{{ order.date|date:"Y-m-d" }}</td>
-                            <td>{{ order.order_status }}</td>
-                            <td>${{ order.total_amount }}</td>
-                            <td>${{ order.final_amount }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+        <div class="mt-4">
+            <h4 class="text-center">Total Sales: ₹{{ total_sales }}</h4>
+            <table class="table table-bordered table-striped text-center">
+                <thead class="thead-dark">
                     <tr>
-                        <td colspan="6">No orders found for the selected date range.</td>
+                        <th>Order ID</th>
+                        <th>Customer Name</th>
+                        <th>Total Price</th>
+                        <th>Date</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if page_obj %}
+                        {% for order in page_obj %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.user }}</td>
+                                <td>₹{{ order.final_amount }}</td>
+                                <td>{{ order.date }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No orders found for the selected filters.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
 
-        <!-- Download Buttons -->
-        <div class="download-buttons">
-            <button id="download-pdf" class="btn btn-primary">Download PDF</button>
-            <button id="download-excel" class="btn btn-secondary">Download Excel</button>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}&month={{ month }}&year={{ year }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for page_num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}&start_date={{ start_date }}&end_date={{ end_date }}&month={{ month }}&year={{ year }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&start_date={{ start_date }}&end_date={{ end_date }}&month={{ month }}&year={{ year }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
-
-    <!-- JavaScript for Download -->
-    <script>
-        // Download Table as PDF
-        document.getElementById('download-pdf').addEventListener('click', function () {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-            
-            // Extract table
-            const table = document.getElementById('sales-table');
-            const rows = [...table.rows];
-            let y = 10;
-
-            // Add title
-            pdf.text("Sales Report", 105, y, { align: 'center' });
-            y += 10;
-
-            // Add table rows
-            rows.forEach((row, rowIndex) => {
-                const cells = [...row.cells];
-                const rowText = cells.map(cell => cell.innerText).join(" | ");
-                pdf.text(rowText, 10, y);
-                y += 10;
-
-                // Add page if necessary
-                if (y > 280) {
-                    pdf.addPage();
-                    y = 10;
-                }
-            });
-
-            // Save PDF
-            pdf.save("sales_report.pdf");
-        });
-
-        // Download Table as Excel
-        document.getElementById('download-excel').addEventListener('click', function () {
-            const table = document.getElementById('sales-table');
-            const workbook = XLSX.utils.book_new();
-            const sheet = XLSX.utils.table_to_sheet(table);
-            XLSX.utils.book_append_sheet(workbook, sheet, "Sales Report");
-            XLSX.writeFile(workbook, "sales_report.xlsx");
-        });
-    </script>
-
-    <style>
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .filter-form {
-            margin-bottom: 20px;
-        }
-        .filter-form label {
-            margin-right: 10px;
-        }
-        .sales-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .sales-table th, .sales-table td {
-            padding: 10px;
-            text-align: left;
-        }
-        .sales-table th {
-            background-color: #f4f4f4;
-        }
-        .download-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: #fff;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: #fff;
-        }
-    </style>
 </body>
 </html>
+

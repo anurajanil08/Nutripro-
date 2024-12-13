@@ -229,7 +229,7 @@
         <div class="row">
             <div class="col-md-12">
                 <ul class="breadcrumb-tree">
-                    <li><a href="#">Home</a></li>
+                    <li><a href="{% url 'accounts:index' %}">Home</a></li>
                     <li><a href="#">Creatien</a></li>
                     <li><a href="#">Protien Bars</a></li>
                     <li class="active">Protien Powder</li>
@@ -276,11 +276,17 @@
                             ₹<span id="variant-offer-price">{{ variants.first.offer_price }}</span>
                             <del class="product-old-price">₹<span id="variant-original-price">{{ variants.first.price }}</span></del>
                         </h3>
-                        <span class="product-available">
-                            {% if variant.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}
-                        </span>
+                        <span id="variant-stock-status" class="product-available"></span>
                         
                     </div>
+
+                     <!-- Show category offer only if it's greater than zero -->
+                     {% if product.Product_category.offer_percentage > 0 %}
+                     <div class="mt-3">
+                         <span class="badge bg-success">Category Offer: {{ product.Product_category.offer_percentage }}% off</span>
+                     </div>
+                     {% endif %}
+                     
                     <p>{{ product.Product_description }}</p>
          
                     <div class="product-options">
@@ -288,7 +294,7 @@
                             Size
                             <select class="input-select" id="variant-select">
                                 {% for variant in variants %}
-                                    <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-offer-price="{{ variant.offer_price }}">
+                                    <option value="{{ variant.id }}" data-price="{{ variant.price }}" data-offer-price="{{ variant.offer_price }}" data-stock="{{ variant.stock }}">
                                         {{ variant.size }}g - ₹{{ variant.offer_price }}
                                     </option>
                                 {% endfor %}
@@ -307,7 +313,13 @@
                             <div class="qty-label">
                                 Qty
                                 <div class="input-number">
-                                    <input type="number" id="quantity-input" value="1" min="1">
+                                    <input 
+                                        type="number" 
+                                        id="quantity-input" 
+                                        value="1" 
+                                        min="1" 
+                                        max="5" 
+                                        readonly>
                                     <span class="qty-up">+</span>
                                     <span class="qty-down">-</span>
                                 </div>
@@ -317,6 +329,8 @@
                             </button>
                         </div>
                     </form>
+                    
+                    
         
                     <ul class="product-links">
                         <li>Category:</li>
@@ -439,131 +453,250 @@
     <div class="container">
         <h2>Related Products</h2>
         <div class="product-grid">
-            {% for related_product in related_products %}
-            <div class="product-card">
-                <a href="{% url 'product:product-detail-page' related_product.id %}" class="product-link">
-                    <div class="product-image">
-                        {% if related_product.thumbnail %}
-                            <img src="{{ related_product.thumbnail.url }}" alt="{{ related_product.Product_name }}">
-                        {% else %}
-                            <img src="{% static 'userside/img/default-product.png' %}" alt="Default Image">
-                        {% endif %}
-                    </div>
-                </a>
-                <div class="product-info">
-                    <p class="product-category">{{ related_product.Product_category.category_name }}</p>
-                    <h3 class="product-name">
-                        <a href="{% url 'product:product-detail-page' related_product.id %}">
-                            {{ related_product.Product_name }}
-                        </a>
-                    </h3>
-                    <div class="product-price-rating">
-                        <div class="product-price">
-                            <span class="current-price">₹{{ related_product.offer_price }}</span>
-                            <span class="old-price">₹{{ related_product.price }}</span>
+            {% for item in related_products %}
+                <div class="product-card">
+                    <a href="{% url 'product:product-detail-page' item.product.id %}" class="product-link">
+                        <div class="product-image">
+                            {% if item.product.thumbnail %}
+                                <img src="{{ item.product.thumbnail.url }}" alt="{{ item.product.Product_name }}">
+                            {% else %}
+                                <img src="{% static 'userside/img/default-product.png' %}" alt="Default Image">
+                            {% endif %}
                         </div>
-                        <div class="product-rating">
-                            {% for i in "12345" %}
-                                <span class="star">★</span>
-                            {% endfor %}
+                    </a>
+                    <div class="product-info">
+                        <p class="product-category">{{ item.product.Product_category.category_name }}</p>
+                        <h3 class="product-name">
+                            <a href="{% url 'product:product-detail-page' item.product.id %}">
+                                {{ item.product.Product_name }}
+                            </a>
+                        </h3>
+                        <div class="product-price-rating">
+                            <div class="product-price">
+                                {% if item.variant_offer_price %}
+                                    <span class="current-price">₹{{ item.variant_offer_price }}</span>
+                                {% else %}
+                                    <span class="current-price">₹{{ item.variant_price }}</span>
+                                {% endif %}
+                                {% if item.variant_price and item.variant_offer_price and item.variant_offer_price != item.variant_price %}
+                                    <span class="old-price">₹{{ item.variant_price }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-rating">
+                                {% for i in "12345" %}
+                                    <span class="star">★</span>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
-                    <div class="product-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn" aria-label="Add to wishlist">
-                                <i class="fa fa-heart-o"></i>
-                            </button>
-                            <button class="action-btn" aria-label="Compare">
-                                <i class="fa fa-exchange"></i>
-                            </button>
-                            <button class="action-btn" aria-label="Quick view">
-                                <i class="fa fa-eye"></i>
-                            </button>
+                        <div class="product-actions">
+                            <div class="action-buttons">
+                                <button class="action-btn" aria-label="Add to wishlist">
+                                    <i class="fa fa-heart-o"></i>
+                                </button>
+                                <button class="action-btn" aria-label="Compare">
+                                    <i class="fa fa-exchange"></i>
+                                </button>
+                                <button class="action-btn" aria-label="Quick view">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
-                        
-
-                    
                     </div>
                 </div>
-            </div>
             {% empty %}
                 <p>No related products found.</p>
             {% endfor %}
         </div>
+        
     </div>
     <!-- /container -->
 </div>
 <!-- /Section -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#add-to-cart-btn').on('click', function(e) {
-            e.preventDefault(); // Prevent the form from submitting the usual way
 
-            const variantId = $('#variant-select').val(); // Get selected variant ID
-            const quantity = $('#quantity-input').val(); // Get quantity
-            const csrfToken = '{{ csrf_token }}'; // CSRF token for security
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        const quantityInput = $('#quantity-input');
+
+        // Handle the increment button
+        $('.qty-up').on('click', function () {
+            let quantity = parseInt(quantityInput.val());
+            if (quantity < 5) {
+                quantityInput.val(quantity + 1);
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Maximum quantity reached',
+                    text: 'You can only add up to 5 items.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+
+        // Handle the decrement button
+        $('.qty-down').on('click', function () {
+            let quantity = parseInt(quantityInput.val());
+            if (quantity > 1) {
+                quantityInput.val(quantity - 1);
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Minimum quantity reached',
+                    text: 'You must add at least 1 item.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+
+        // Prevent user from manually entering invalid quantities
+        quantityInput.on('input', function () {
+            let quantity = parseInt($(this).val());
+            if (isNaN(quantity) || quantity < 1) {
+                quantityInput.val(1); // Reset to minimum
+            } else if (quantity > 5) {
+                quantityInput.val(5); // Reset to maximum
+            }
+        });
+
+        // Add to cart functionality
+        $('#add-to-cart-btn').on('click', function (e) {
+            e.preventDefault();
+
+            const quantity = parseInt(quantityInput.val());
+            const csrfToken = '{{ csrf_token }}';
+            const variantId = $('#variant-select').val(); // Get the variant ID
 
             $.ajax({
-                url: "{% url 'cart:add_to_cart' 0 %}".replace('/0/', `/${variantId}/`), // URL with variant ID
+                url: "{% url 'cart:add_to_cart' 0 %}".replace('/0/', `/${variantId}/`),
                 type: 'POST',
                 data: {
                     'quantity': quantity,
                     'csrfmiddlewaretoken': csrfToken
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
-                        alert(response.message); // Success message (optional)
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-right',
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
                     } else {
-                        alert('Failed to add item to cart.'); // Failure message
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-right',
+                            icon: 'error',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-right',
+                        icon: 'error',
+                        title: 'An error occurred. Please try again.',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
                 }
             });
         });
     });
 </script>
 
-  
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const qtyInput = document.getElementById('quantity-input');
+        const qtyUp = document.querySelector('.qty-up');
+        const qtyDown = document.querySelector('.qty-down');
+        const maxQty = 5; // Maximum quantity limit
+        const minQty = 1; // Minimum quantity limit
+
+        // Increment quantity
+        qtyUp.addEventListener('click', function () {
+            let currentQty = parseInt(qtyInput.value, 10);
+            if (currentQty < maxQty) {
+                qtyInput.value = currentQty + 1;
+            } else {
+                qtyInput.value = maxQty; // Ensure it stays at max
+                Swal.fire({
+                    toast: true,
+                    position: 'top-right',
+                    icon: 'warning',
+                    title: `Maximum quantity (${maxQty}) reached!`,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+
+        // Decrement quantity
+        qtyDown.addEventListener('click', function () {
+            let currentQty = parseInt(qtyInput.value, 10);
+            if (currentQty > minQty) {
+                qtyInput.value = currentQty - 1;
+            } else {
+                qtyInput.value = minQty; // Ensure it stays at min
+                Swal.fire({
+                    toast: true,
+                    position: 'top-right',
+                    icon: 'warning',
+                    title: `Minimum quantity (${minQty}) reached!`,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+    });
+</script>
+
+
 <!-- JavaScript to handle price update -->
 <script>
-    function updatePrice() {
+    function updatePriceAndStock() {
         const variantSelect = document.getElementById('variant-select');
         const selectedVariant = variantSelect.options[variantSelect.selectedIndex];
 
-        // Get price and offer price for the selected variant
+        // Get price, offer price, and stock for the selected variant
         const newPrice = selectedVariant.getAttribute('data-price');
         const newOfferPrice = selectedVariant.getAttribute('data-offer-price');
+        const newStock = selectedVariant.getAttribute('data-stock');
 
         // Update the displayed prices
         document.getElementById('variant-original-price').innerText = newPrice;
         document.getElementById('variant-offer-price').innerText = newOfferPrice;
+
+        // Update the stock status
+        const stockStatus = document.getElementById('variant-stock-status');
+        if (parseInt(newStock) > 0) {
+            stockStatus.innerText = "In Stock";
+            stockStatus.classList.remove("text-danger");
+            stockStatus.classList.add("text-success");
+        } else {
+            stockStatus.innerText = "Out of Stock";
+            stockStatus.classList.remove("text-success");
+            stockStatus.classList.add("text-danger");
+        }
     }
 
-    // Quantity increment/decrement functionality
-    document.querySelector('.qty-up').addEventListener('click', function() {
-        let quantity = parseInt(document.getElementById('quantity-input').value);
-        document.getElementById('quantity-input').value = quantity + 1;
-    });
+    // Update price and stock when the variant is changed
+    document.getElementById('variant-select').addEventListener('change', updatePriceAndStock);
 
-    document.querySelector('.qty-down').addEventListener('click', function() {
-        let quantity = parseInt(document.getElementById('quantity-input').value);
-        if (quantity > 1) {
-            document.getElementById('quantity-input').value = quantity - 1;
-        }
-    });
-
-    // Update price when the variant is changed
-    document.getElementById('variant-select').addEventListener('change', updatePrice);
-
-    // Initialize price on page load based on the default selected variant
+    // Initialize price and stock on page load based on the default selected variant
     document.addEventListener('DOMContentLoaded', function() {
-        updatePrice(); // Update the price immediately when the page is loaded.
+        updatePriceAndStock(); // Update price and stock immediately when the page is loaded.
     });
 </script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

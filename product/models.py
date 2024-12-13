@@ -2,6 +2,7 @@ from django.db import models
 from category.models import Category
 from brand.models import Brand
 from nutri_auth.models import User
+from django.db.models import Count
 
 
 # Create your models here.
@@ -12,20 +13,25 @@ class Product(models.Model):
     Product_description = models.TextField(max_length=5000, null=False)
     Product_category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     Product_brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
-    offer_price = models.DecimalField(max_digits=8, decimal_places=2)
     thumbnail = models.ImageField(upload_to="Product_thumbnails", null=True)
-
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def percentage_discount(self):
-        return int(((self.price - self.offer_price) / self.price) * 100)
-
+    
     def __str__(self):
-        return f"{self.Product_brand.brand_name} - {self.Product_name}"
+        return self.Product_name
+    
+    @staticmethod
+    def get_top_10_best_selling_products():
+        from order.models import OrderItem  # Import here to avoid circular imports
 
+        return (
+            Product.objects.filter(
+                productvariant__orderitem__order__order_status="Delivered"
+            )
+            .annotate(total_sales=Count('productvariant__orderitem'))
+            .order_by('-total_sales')[:10]
+        )
 
 class ProductVariant(models.Model):
     Product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -44,6 +50,7 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return f"{self.Product.Product_name} - {self.size}"
+    
 
 
 class ProductImages(models.Model):

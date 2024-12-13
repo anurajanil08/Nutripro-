@@ -287,13 +287,34 @@
         color: #fff;
     }
 </style>
+<!-- NAVIGATION -->
+<nav id="navigation">
+	
+	<!-- container -->
+	<div class="container">
+		<!-- responsive-nav -->
+		<div id="responsive-nav">
+			<!-- NAV -->
+			<ul class="main-nav nav navbar-nav">
+				<li><a href="{% url 'accounts:index' %}">Home</a></li>
+				<li  class="active"><a href="{% url 'accounts:shop_page' %}">Shop page</a></li>
+				<li><a href="{% url 'accounts:shop_page' %}">Categories</a></li>
+				<li><a href="{% url 'accounts:shop_page' %}">Brand</a></li>
+			</ul>
+			<!-- /NAV -->
+		</div>
+		<!-- /responsive-nav -->
+	</div>
+	<!-- /container -->
+</nav>
+<!-- /NAVIGATION -->
 
 <!-- BREADCRUMB -->
 <div id="breadcrumb" class="section">
     <div class="container">
         <ul class="breadcrumb-tree">
-            <li><a href="#">HOME</a></li>
-            <li><a href="#">SHOP PAGE</a></li>
+            <li><a href="{% url 'accounts:index' %}">HOME</a></li>
+            <li><a href="{% url 'accounts:shop_page' %}">SHOP PAGE</a></li>
         </ul>
     </div>
 </div>

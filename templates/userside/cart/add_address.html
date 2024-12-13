@@ -1,48 +1,78 @@
 {% extends 'userside/base.html' %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Add New Address</h2>
 
     <form method="POST">
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="name" class="form-label">Full Name</label>
-            {{ form.name }}
-        </div>
-        <div class="mb-3">
-            <label for="house_name" class="form-label">House Name</label>
-            {{ form.house_name }}
-        </div>
-        <div class="mb-3">
-            <label for="street_name" class="form-label">Street Name</label>
-            {{ form.street_name }}
-        </div>
-        <div class="mb-3">
-            <label for="pin_number" class="form-label">PIN Code</label>
-            {{ form.pin_number }}
-        </div>
-        <div class="mb-3">
-            <label for="district" class="form-label">District</label>
-            {{ form.district }}
-        </div>
-        <div class="mb-3">
-            <label for="state" class="form-label">State</label>
-            {{ form.state }}
-        </div>
-        <div class="mb-3">
-            <label for="country" class="form-label">Country</label>
-            {{ form.country }}
-        </div>
-        <div class="mb-3">
-            <label for="phone_number" class="form-label">Phone Number</label>
-            {{ form.phone_number }}
-        </div>
-        <div class="mb-3">
-            <label for="is_default" class="form-label">Set as Default</label>
-            {{ form.is_default }}
+        
+        <div class="mb-3 row">
+            <label for="name" class="col-sm-2 col-form-label">Full Name</label>
+            <div class="col-sm-10">
+                {{ form.name }}
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Add Address</button>
+        <div class="mb-3 row">
+            <label for="house_name" class="col-sm-2 col-form-label">House Name</label>
+            <div class="col-sm-10">
+                {{ form.house_name }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="street_name" class="col-sm-2 col-form-label">Street Name</label>
+            <div class="col-sm-10">
+                {{ form.street_name }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="pin_number" class="col-sm-2 col-form-label">PIN Code</label>
+            <div class="col-sm-10">
+                {{ form.pin_number }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="district" class="col-sm-2 col-form-label">District</label>
+            <div class="col-sm-10">
+                {{ form.district }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="state" class="col-sm-2 col-form-label">State</label>
+            <div class="col-sm-10">
+                {{ form.state }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="country" class="col-sm-2 col-form-label">Country</label>
+            <div class="col-sm-10">
+                {{ form.country }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="phone_number" class="col-sm-2 col-form-label">Phone Number</label>
+            <div class="col-sm-10">
+                {{ form.phone_number }}
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="is_default" class="col-sm-2 col-form-label">Set as Default</label>
+            <div class="col-sm-10">
+                {{ form.is_default }}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Add Address</button>
+        </div>
     </form>
 </div>
 {% endblock %}

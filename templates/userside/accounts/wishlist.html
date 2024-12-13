@@ -1,74 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist</title>
+{% extends 'userside/base.html' %}
+{% load static %}
+{% block content %}
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-        .container {
-            width: 80%;
-            margin: 20px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+
+        /* Header */
         h1 {
             text-align: center;
-            margin-bottom: 20px;
             color: #333;
+            margin-bottom: 30px;
         }
-        .wishlist-item {
+
+        /* Wishlist Items */
+        .wishlist-container {
             display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .wishlist-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
+            padding: 15px;
+            width: calc(33.333% - 20px); /* Three items per row */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .wishlist-item:last-child {
-            border-bottom: none;
+
+        .wishlist-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
         .wishlist-item img {
-            width: 80px;
-            height: 80px;
+            width: 100%;
+            height: 180px;
             object-fit: cover;
-            border-radius: 5px;
+            border-radius: 8px;
+            margin-bottom: 15px;
         }
+
         .wishlist-details {
-            flex: 1;
-            margin-left: 15px;
+            text-align: center;
+            margin-bottom: 15px;
         }
+
         .wishlist-details h3 {
-            margin: 0;
+            font-size: 18px;
             color: #555;
+            margin-bottom: 5px;
         }
+
         .wishlist-details p {
-            margin: 5px 0 0;
+            margin: 5px 0;
+            font-size: 16px;
             color: #777;
         }
+
+        /* Remove Button */
         .remove-btn {
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 14px;
             transition: background 0.3s ease;
         }
+
         .remove-btn:hover {
             background: #c0392b;
         }
+
+        /* Empty Message */
         .empty-message {
             text-align: center;
             color: #888;
-            font-size: 18px;
-            margin-top: 30px;
+            font-size: 20px;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -76,23 +91,68 @@
     <div class="container">
         <h1>My Wishlist</h1>
         
-        {% if wishlist_items %}
+        <div class="wishlist-container">
             {% for item in wishlist_items %}
                 <div class="wishlist-item">
-                    <img src="{{ item.variant.Product.image.url }}" alt="{{ item.variant.Product.Product_name }}">
+                    <!-- Product Thumbnail -->
+                    {% if item.variant.Product.thumbnail %}
+                    <div class="product-image">
+                        <img src="{{ item.variant.Product.thumbnail.url }}" alt="{{ item.variant.Product.Product_name }}" class="product-thumbnail">
+                    </div>
+                {% else %}
+                    <div class="product-image">
+                        <img src="/static/images/default-thumbnail.jpg" alt="Default Image" class="product-thumbnail">
+                    </div>
+                {% endif %}
+                
+        
+                    <!-- Product Details -->
                     <div class="wishlist-details">
                         <h3>{{ item.variant.Product.Product_name }}</h3>
                         <p>Size: {{ item.variant.size }}</p>
+                        <p>Offer Price: ₹{{ item.variant.offer_price }}</p>
                     </div>
+        
+                    <!-- Remove Button -->
                     <button class="remove-btn" onclick="removeFromWishlist({{ item.variant.id }})">Remove</button>
+                    <button onclick="addToCart('{{ item.variant.id }}', '{% url 'cart:add_to_cart' variant_id=item.variant.id %}')">
+                        Add to Cart
+                    </button>
+
+
+                    
                 </div>
+            {% empty %}
+                <p class="empty-message">Your wishlist is currently empty!</p>
             {% endfor %}
-        {% else %}
-            <p class="empty-message">Your wishlist is empty!</p>
-        {% endif %}
+        </div>
     </div>
 
+    <!-- SweetAlert2 Notifications -->
     <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            {% if messages %}
+                const messages = [
+                    {% for message in messages %}
+                        {
+                            level: "{{ message.tags }}",
+                            text: "{{ message }}"
+                        },
+                    {% endfor %}
+                ];
+                messages.forEach(message => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-right',
+                        icon: message.level === 'success' ? 'success' : 'error',
+                        title: message.text,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                });
+            {% endif %}
+        });
+
         function removeFromWishlist(variantId) {
             fetch(`/wishlist/remove/${variantId}/`, {
                 method: 'POST',
@@ -103,12 +163,54 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                location.reload(); 
+                Swal.fire({
+                    icon: data.is_in_wishlist ? 'success' : 'error',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    location.reload(); // Reload to reflect changes
+                });
             })
             .catch(error => console.error('Error:', error));
         }
-    </script>
-</body>
-</html>
+        function addToCart(variantId, addToCartUrl) {
+            fetch(addToCartUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity: 1 }) // Default quantity
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    icon: data.success ? 'success' : 'error',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    if (data.success) {
+                        location.reload(); // Optional: Reload to reflect changes
+                    }
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
 
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+{% endblock %}

@@ -44,6 +44,8 @@ def edit_category(request, id):
         form = CategoryForm(instance=category)
     
     return render(request, 'adminside/category/editcategory.html', {'form': form, 'category': category})
+
+
 @admin_required
 def category_list(request):
     categories = Category.objects.all()

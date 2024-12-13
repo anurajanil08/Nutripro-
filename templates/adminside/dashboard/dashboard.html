@@ -1,205 +1,402 @@
 {% extends 'adminside/base.html' %}
 
 {% block title %}
-<a class="navbar-brand" href="">Dashboard</a>
-<div class="button-container">
-    <a href="{% url 'adminpanel:sales' %}">
-        <button>View Sales Report</button>
-    </a>
+<style>
+    /* Dashboard Styling */
+:root {
+    --primary-color: #3b82f6;
+    --secondary-color: #10b981;
+    --background-color: #f3f4f6;
+    --card-background: #ffffff;
+    --text-color: #1f2937;
+    --border-radius: 12px;
+}
+
+.dashboard-container {
+    background-color: var(--background-color);
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between; /* Ensures the title is on the left and the button is on the right */
+    align-items: center; /* Vertically aligns items */
+    padding: 10px; /* Optional padding */
+}
+
+.dashboard-title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: bold; /* Makes the text bold */
+    color: #333; /* Sets the text color */
+}
+
+
+.dashboard-actions {
+    padding: 0px 550px;
+    text-align: right;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--background-color);
+    padding-bottom: 0.75rem;
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    margin-left: 0.75rem;
+}
+
+.icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.product-list, 
+.category-list, 
+.brand-list {
+    list-style: none;
+    padding: 0;
+}
+
+.product-item, 
+.category-item, 
+.brand-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--background-color);
+}
+
+.product-item:last-child, 
+.category-item:last-child, 
+.brand-item:last-child {
+    border-bottom: none;
+}
+
+.product-sales, 
+.category-sales, 
+.brand-sales {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+}
+
+.dashboard-chart-container {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.chart-filter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.chart-filter label {
+    margin-right: 0.5rem;
+}
+
+.form-control {
+    padding: 0.5rem;
+    border: 1px solid var(--background-color);
+    border-radius: 6px;
+}
+
+.chart-container {
+    height: 400px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+<div class="dashboard-header">
+    <h1 class="dashboard-title">Admin Dashboard</h1>
+    <div class="dashboard-actions">
+        <a href="{% url 'adminpanel:sales_report' %}" class="btn btn-primary">
+            View Sales Report
+        </a>
+    </div>
 </div>
+
+
+
 {% endblock %}
 
 {% block content %}
-
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-3 col-sm-6">
-                <div class="card">
-                    <div class="content">
-                        <div class="row">
-                            <div class="col-xs-5">
-                                <div class="icon-big icon-warning text-center">
-                                    <i class="ti-server"></i>
-                                </div>
-                            </div>
-                            <div class="col-xs-7">
-                                <div class="numbers">
-                                    <p>Capacity</p>
-                                    105GB
-                                </div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <hr />
-                            <div class="stats">
-                                <i class="ti-reload"></i> Updated now
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="dashboard-container">
+    <div class="dashboard-grid">
+        <!-- Top Products Section -->
+        <div class="dashboard-card top-products">
+            <div class="card-header">
+                <i class="icon icon-trophy"></i>
+                <h2>Top Selling Products</h2>
             </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card">
-                    <div class="content">
-                        <div class="row">
-                            <div class="col-xs-5">
-                                <div class="icon-big icon-success text-center">
-                                    <i class="ti-wallet"></i>
-                                </div>
-                            </div>
-                            <div class="col-xs-7">
-                                <div class="numbers">
-                                    <p>Revenue</p>
-                                    $1,345
-                                </div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <hr />
-                            <div class="stats">
-                                <i class="ti-calendar"></i> Last day
-                            </div>
-                        </div>
+            <ul class="product-list">
+                {% for product in top_products %}
+                <li class="product-item">
+                    <div class="product-info">
+                        <span class="product-name">{{ product.Product_name }}</span>
+                        <span class="product-category">{{ product.category }}</span>
                     </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card">
-                    <div class="content">
-                        <div class="row">
-                            <div class="col-xs-5">
-                                <div class="icon-big icon-danger text-center">
-                                    <i class="ti-pulse"></i>
-                                </div>
-                            </div>
-                            <div class="col-xs-7">
-                                <div class="numbers">
-                                    <p>Errors</p>
-                                    23
-                                </div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <hr />
-                            <div class="stats">
-                                <i class="ti-timer"></i> In the last hour
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card">
-                    <div class="content">
-                        <div class="row">
-                            <div class="col-xs-5">
-                                <div class="icon-big icon-info text-center">
-                                    <i class="ti-twitter-alt"></i>
-                                </div>
-                            </div>
-                            <div class="col-xs-7">
-                                <div class="numbers">
-                                    <p>Followers</p>
-                                    +45
-                                </div>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            <hr />
-                            <div class="stats">
-                                <i class="ti-reload"></i> Updated now
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <span class="product-sales">{{ product.total_sales }} Sales</span>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="row">
 
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="header">
-                        <h4 class="title">Users Behavior</h4>
-                        <p class="category">24 Hours performance</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartHours" class="ct-chart"></div>
-                        <div class="footer">
-                            <div class="chart-legend">
-                                <i class="fa fa-circle text-info"></i> Open
-                                <i class="fa fa-circle text-danger"></i> Click
-                                <i class="fa fa-circle text-warning"></i> Click Second Time
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="ti-reload"></i> Updated 3 minutes ago
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Top Categories Section -->
+        <div class="dashboard-card top-categories">
+            <div class="card-header">
+                <i class="icon icon-layers"></i>
+                <h2>Top Categories</h2>
             </div>
+            <ul class="category-list">
+                {% for category in top_categories %}
+                <li class="category-item">
+                    <div class="category-details">
+                        <span class="category-name">{{ category.category_name }}</span>
+                    </div>
+                    <span class="category-sales">{{ category.total_sales }} Sales</span>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="header">
-                        <h4 class="title">Email Statistics</h4>
-                        <p class="category">Last Campaign Performance</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
 
-                        <div class="footer">
-                            <div class="chart-legend">
-                                <i class="fa fa-circle text-info"></i> Open
-                                <i class="fa fa-circle text-danger"></i> Bounce
-                                <i class="fa fa-circle text-warning"></i> Unsubscribe
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="ti-timer"></i> Campaign sent 2 days ago
-                            </div>
-                        </div>
+        <!-- Top Brands Section -->
+        <div class="dashboard-card top-brands">
+            <div class="card-header">
+                <i class="icon icon-star"></i>
+                <h2>Top Brands</h2>
+            </div>
+            <ul class="brand-list">
+                {% for brand in top_brands %}
+                <li class="brand-item">
+                    <div class="brand-details">
+                        <span class="brand-name">{{ brand.brand_name }}</span>
                     </div>
+                    <span class="brand-sales">{{ brand.total_sales }} Sales</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Order Status Chart Section -->
+    <div class="dashboard-chart-container">
+        <div class="dashboard-card order-status-chart">
+            <div class="card-header">
+                <h2>Order Status Overview</h2>
+                <div class="chart-filter">
+                    <label for="filterType">Filter:</label>
+                    <select id="filterType" class="form-control">
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
                 </div>
             </div>
-            <div class="container">
-                <h1>Welcome to Admin Dashboard</h1>
-                <!-- Other dashboard content -->
-        
-                <!-- Sales Report Button -->
-                {% comment %} <div class="button-container">
-                    <a href="{% url 'adminpanel:sales' %}">
-                        <button>View Sales Report</button>
-                    </a>
-                </div> {% endcomment %}
-            {% comment %} <div class="col-md-6">
-                <div class="card ">
-                    <div class="header">
-                        <h4 class="title">2015 Sales</h4>
-                        <p class="category">All products including Taxes</p>
-                    </div>
-                    <div class="content">
-                        <div id="chartActivity" class="ct-chart"></div>
-
-                        <div class="footer">
-                            <div class="chart-legend">
-                                <i class="fa fa-circle text-info"></i> Tesla Model S
-                                <i class="fa fa-circle text-warning"></i> BMW 5 Series
-                            </div>
-                            <hr>
-                            <div class="stats">
-                                <i class="ti-check"></i> Data information certified
-                            </div> {% endcomment %}
-                        </div>
-                    </div>
-                </div>
+            <div class="chart-container">
+                <canvas id="orderStatusChart"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterDropdown = document.getElementById('filterType');
+        const chartCanvas = document.getElementById('orderStatusChart').getContext('2d');
+        let chartInstance;
+
+        // Function to fetch and update chart data
+        function updateChart(filterType) {
+            fetch(`/adminpanel/chart-data/?filter=${filterType}`)
+                .then(response => response.json())
+                .then(data => {
+                    const labels = data.labels;
+                    const chartData = data.data;
+
+                    // Destroy previous chart instance if exists
+                    if (chartInstance) {
+                        chartInstance.destroy();
+                    }
+
+                    // Create a new chart instance
+                    chartInstance = new Chart(chartCanvas, {
+                        type: 'bar',  // Bar chart type
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `Orders by Status (${filterType})`,
+                                data: chartData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)', // Light teal background
+                                borderColor: 'rgba(75, 192, 192, 1)', // Darker teal border
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,  // Allow the chart to stretch and fit the container
+                            animation: {
+                                duration: 1000,  // Smooth chart animation
+                                easing: 'easeInOutQuad'
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            family: "'Roboto', sans-serif",
+                                            size: 14,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                    titleFont: {
+                                        family: "'Roboto', sans-serif",
+                                        size: 14,
+                                    },
+                                    bodyFont: {
+                                        family: "'Roboto', sans-serif",
+                                        size: 12,
+                                    },
+                                    cornerRadius: 6,
+                                    padding: 10
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Order Statuses',
+                                        font: {
+                                            family: "'Roboto', sans-serif",
+                                            size: 16,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.1)',
+                                        lineWidth: 1
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: "'Roboto', sans-serif",
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Orders',
+                                        font: {
+                                            family: "'Roboto', sans-serif",
+                                            size: 16,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.1)',
+                                        lineWidth: 1
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: "'Roboto', sans-serif",
+                                            size: 12
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching chart data:', error));
+        }
+
+        // Fetch initial chart data
+        updateChart(filterDropdown.value);
+
+        // Update chart data on filter change
+        filterDropdown.addEventListener('change', function () {
+            updateChart(filterDropdown.value);
+        });
+    });
+</script>
+
 {% endblock content %}
+
+
+
+
+
+
 
 
 

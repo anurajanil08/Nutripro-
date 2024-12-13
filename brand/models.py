@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Count
+
 
 # Create your models here.
 class Brand(models.Model):
@@ -12,3 +14,15 @@ class Brand(models.Model):
 
     def __str__(self) -> str:
         return self.brand_name
+    
+
+    @staticmethod
+    def get_top_10_brands():
+        from order.models import OrderItem 
+        return (
+            Brand.objects.filter(
+                product__productvariant__orderitem__order__order_status="Delivered"
+            )
+            .annotate(total_sales=Count('product__productvariant__orderitem'))
+            .order_by('-total_sales')[:10]
+        )

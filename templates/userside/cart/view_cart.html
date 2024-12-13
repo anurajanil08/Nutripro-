@@ -3,27 +3,15 @@
 {% load socialaccount %}
 
 {% block content %}
-<title>Shopping Cart</title>
+
 
 <!-- Add custom CSS for styling -->
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-        background-color: #f5f5f5;
-        margin: 0;
-        padding: 0;
-    }
-    .container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+
     .cart-header {
         text-align: center;
         margin-bottom: 20px;
+        margin:10px;
     }
     .cart-header h1 {
         font-size: 24px;
@@ -83,14 +71,44 @@
         font-weight: 700;
         color: #007bff;
     }
+    .empty-cart {
+        text-align: center;
+        padding: 50px;
+    }
+    
+    .empty-cart-image {
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+    .shop-button {
+        margin-top: 20px;
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    
+    .shop-button:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+    
 </style>
 
+<!-- Cart HTML structure -->
 <!-- Cart HTML structure -->
 <div class="container">
     <div class="cart-header">
         <h1>Your Cart</h1>
     </div>
 
+    {% if cart_items %}
     <table class="cart-table">
         <thead>
             <tr>
@@ -113,12 +131,18 @@
                     {% endif %}
                     {{ item.product.Product_name }}
                 </td>
-                <td>{{ item.variant.size }}</td>
+                <td>{{ item.variant.size }} g</td>
                 <td>
                     <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" data-item-id="{{ item.id }}">
                 </td>
-                <td class="item-price">${{ item.variant.offer_price }}</td>
-                <td class="subtotal">${{ item.sub_total }}</td>
+                <td class="item-price">
+                    {% if item.product.Product_category.offer_percentage > 0 %}
+                        ₹{{ item.discounted_price|floatformat:2 }}
+                    {% else %}
+                        ₹{{ item.variant.offer_price|floatformat:2 }}
+                    {% endif %}
+                </td>                
+                <td class="subtotal">₹{{ item.sub_total }}</td>
                 <td>
                     <button type="button" class="btn btn-secondary" onclick="confirmDelete({{ item.id }})">Remove</button>
                 </td>
@@ -126,12 +150,23 @@
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <div class="empty-cart">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBAqTyqJD4YuZL1nr5Kw4qQz7f38rKJzjebw&s" alt="No items in cart" class="empty-cart-image">
+        <p>Your cart is empty. Start shopping now!</p>
+
+        <a href="{% url 'accounts:shop_page' %}" class="btn btn-primary shop-button">Go to Shop</a>
+    </div>
+    {% endif %}
 
     <div class="cart-summary">
-        <h2>Total: <span class="total-price">${{ total_price }}</span></h2>
+        {% if cart_items %}
+        <h2>Total: <span class="total-price">₹{{ total_price }}</span></h2>
         <a href="{% url 'cart:checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+        {% endif %}
     </div>
 </div>
+
 
 <!-- Include SweetAlert2 library for confirmation dialogs -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -139,11 +174,11 @@
 <!-- JavaScript -->
 <script>
     function parsePriceString(priceStr) {
-        return parseFloat(priceStr.replace('$', '').trim());
+        return parseFloat(priceStr.replace('₹', '').trim());
     }
 
     function formatPrice(number) {
-        return `$${number.toFixed(2)}`;
+        return `₹${number.toFixed(2)}`;
     }
 
     function calculateSubtotal(price, quantity) {

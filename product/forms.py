@@ -10,28 +10,51 @@ class ProductForm(forms.ModelForm):
             'Product_description', 
             'Product_category', 
             'Product_brand', 
-            'price', 
-            'offer_price', 
-            'is_active'
         ]
 
-    def clean_price(self):
-        price = self.cleaned_data.get('price')
-        if price is not None and price < 0:
-            raise forms.ValidationError("Price cannot be less than 0.")
-        return price
+    
+    def clean_Product_name(self):
+        product_name = self.cleaned_data.get('Product_name')
+        if not product_name:
+            raise forms.ValidationError("Product name is required.")
+        if len(product_name) < 3:
+            raise forms.ValidationError("Product name must be at least 3 characters long.")
+        return product_name
 
-    def clean_offer_price(self):
-        offer_price = self.cleaned_data.get('offer_price')
-        price = self.cleaned_data.get('price')
+    
+    def clean_Product_description(self):
+        product_description = self.cleaned_data.get('Product_description')
+        if not product_description:
+            raise forms.ValidationError("Product description is required.")
+        if len(product_description) < 10:
+            raise forms.ValidationError("Product description must be at least 10 characters long.")
+        return product_description
 
-        if offer_price is not None and offer_price < 0:
-            raise forms.ValidationError("Offer price cannot be less than 0.")
+   
+    def clean_Product_category(self):
+        product_category = self.cleaned_data.get('Product_category')
+        if not product_category:
+            raise forms.ValidationError("Please select a product category.")
+        return product_category
 
-        if price is not None and offer_price >= price:
-            raise forms.ValidationError("Offer price must be less than the regular price.")
+    
+    def clean_Product_brand(self):
+        product_brand = self.cleaned_data.get('Product_brand')
+        if not product_brand:
+            raise forms.ValidationError("Please select a product brand.")
+        return product_brand
 
-        return offer_price
+   
+    def clean(self):
+        cleaned_data = super().clean()
+        product_name = cleaned_data.get('Product_name')
+        product_description = cleaned_data.get('Product_description')
+
+        if product_name and product_description:
+            if product_name.lower() in product_description.lower():
+                raise forms.ValidationError("Product description should not contain the product name.")
+
+        return cleaned_data
 
 
 class ProductVariantForm(forms.ModelForm):
@@ -48,20 +71,20 @@ class ProductVariantForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set default values if necessary
+       
         if self.initial.get('size') is None:
             self.initial['size'] = ''
 
-    # Validation for 'size'
+    
     def clean_size(self):
         size = self.cleaned_data.get('size')
         if not size:
             raise forms.ValidationError("Size is required.")
-        if not size.isalnum():  # Only allow alphanumeric size values
+        if not size.isalnum(): 
             raise forms.ValidationError("Size must be alphanumeric.")
         return size
 
-    # Validation for 'stock'
+    
     def clean_stock(self):
         stock = self.cleaned_data.get('stock')
         if stock is None:
@@ -70,7 +93,7 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Stock must be a non-negative value.")
         return stock
 
-    # Validation for 'price'
+    
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price is None:
@@ -79,7 +102,7 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Price must be a positive value.")
         return price
 
-    # Validation for 'offer_price'
+    
     def clean_offer_price(self):
         offer_price = self.cleaned_data.get('offer_price')
         price = self.cleaned_data.get('price')
@@ -92,7 +115,7 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Offer price must be less than the regular price.")
         return offer_price
 
-    # Validation for 'variant_status'
+    
     def clean_variant_status(self):
         variant_status = self.cleaned_data.get('variant_status')
         if variant_status is None:

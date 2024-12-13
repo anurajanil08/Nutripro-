@@ -26,25 +26,33 @@
         {% csrf_token %}
         
         <div class="form-group">
-            <label for="category_name">Category Name</label>
-            <input type="text" name="category_name" id="category_name" class="form-control" required>
+            <label for="id_category_name">Category Name</label>
+            <input type="text" name="category_name" id="id_category_name" class="form-control" required>
         </div>
-
+    
         <div class="form-group">
-            <label for="description">Description</label>
-            <textarea name="description" id="description" class="form-control" rows="3"></textarea>
+            <label for="id_category_description">Description</label>
+            <textarea name="category_description" id="id_category_description" rows="4" cols="40" 
+                      class="form-control" placeholder="Enter category description here..."></textarea>
         </div>
-
-        <div class="custom-form-group">
-            <div class="custom-checkbox">
-                <input type="checkbox" name="is_active" id="is_active" class="form-check-input"> 
-                <label for="is_active" class="custom-check-label">Active</label>
-            </div>
+    
+        <div class="form-group">
+            <label for="id_offer_percentage">Offer Percentage (optional)</label>
+            <input type="number" name="offer_percentage" id="id_offer_percentage" min="0" max="100" 
+                   placeholder="Enter a discount percentage" class="form-control">
+            <small class="form-text text-muted">
+                Enter a percentage discount for this category.
+            </small>
         </div>
-        
-        
-        <button type="submit" class="btn btn-primary">Create Category</button>
+    
+        <div class="form-check">
+            <input type="checkbox" name="is_active" id="id_is_active" class="form-check-input">
+            <label for="id_is_active" class="form-check-label">Active</label>
+        </div>
+    
+        <button type="submit" class="btn btn-primary mt-3">Create Category</button>
     </form>
+    
 </div>
 {% endblock content %}
 

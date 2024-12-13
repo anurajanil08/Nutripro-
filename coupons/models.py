@@ -17,13 +17,22 @@ class Coupon(models.Model):
     usage_count = models.IntegerField(default=0)
 
     def is_valid(self):
-        """Check if the coupon is valid"""
+        """Check if the coupon is valid."""
+        now = timezone.now()
+        
+       
         if not self.is_active:
             return False
-        if self.expiry_date < timezone.now():
+        
+       
+        if now > self.expiry_date:
             return False
+        
+       
         if self.usage_count >= self.max_usage:
             return False
+
+        
         return True
 
     def __str__(self):

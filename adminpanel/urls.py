@@ -11,6 +11,7 @@ urlpatterns = [
     path("userlist/",views.list_users,name="userlist"),
     path('toggle_user_active/<int:user_id>/', views.toggle_user_active, name='toggle_user_active'),
     path("logout/",views.custom_logout_view , name='logout'),
-    path('sales/', views.sales_report, name='sales'),
+    path('sales/', views.sales_report, name='sales_report'),
+    path('chart-data/', views.chart_data_view, name='chart_data'),
 
 ]

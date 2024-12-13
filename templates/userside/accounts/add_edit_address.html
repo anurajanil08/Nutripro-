@@ -1,107 +1,131 @@
 {% extends 'userside/base.html' %}
 {% load static %}
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if address %}Edit Address{% else %}Add New Address{% endif %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f6f9;
-            color: #495057;
-            font-size: 1.1rem;
-        }
-        .container {
-            max-width: 800px;
-            margin-top: 30px;
-        }
-        .card {
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            border-radius: 8px;
-            background-color: #ffffff;
-        }
-        .card-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #343a40;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .form-label {
-            font-weight: 500;
-            color: #343a40;
-        }
-        .form-check-label {
-            color: #343a40;
-        }
-        .btn-primary {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-            font-weight: bold;
-            width: 100%;
-        }
-    </style>
-</head>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<body>
-    <div class="container">
-        <div class="card">
-            <h2 class="card-title">{% if address %}Edit Address{% else %}Add New Address{% endif %}</h2>
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="card" style="width: 400px;">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">{% if address %}Edit Address{% else %}Add New Address{% endif %}</h2>
             <form method="post" action="{% if address %}{% url 'accounts:edit_address' address.id %}{% else %}{% url 'accounts:add_address' %}{% endif %}">
                 {% csrf_token %}
-                
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ address.name|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ form.instance.name|default_if_none:'' }}" required>
+
+                    {% if form.name.errors %}
+                        <div class="text-danger">
+                            {% for error in form.name.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="house_name" class="form-label">House Name</label>
-                    <input type="text" class="form-control" id="house_name" name="house_name" value="{{ address.house_name|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="house_name" name="house_name" value="{{ form.instance.house_name|default_if_none:'' }}" required>
+                    {% if form.house_name.errors %}
+                        <div class="text-danger">
+                            {% for error in form.house_name.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="street_name" class="form-label">Street Name</label>
-                    <input type="text" class="form-control" id="street_name" name="street_name" value="{{ address.street_name|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="street_name" name="street_name" value="{{ form.instance.street_name|default_if_none:'' }}" required>
+                    {% if form.street_name.errors %}
+                        <div class="text-danger">
+                            {% for error in form.street_name.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="pin_number" class="form-label">PIN Number</label>
-                    <input type="text" class="form-control" id="pin_number" name="pin_number" maxlength="6" value="{{ address.pin_number|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="pin_number" name="pin_number" maxlength="6" value="{{ form.instance.pin_number|default_if_none:'' }}" required>
+                    {% if form.pin_number.errors %}
+                        <div class="text-danger">
+                            {% for error in form.pin_number.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="district" class="form-label">District</label>
-                    <input type="text" class="form-control" id="district" name="district" value="{{ address.district|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="district" name="district" value="{{ form.instance.district|default_if_none:'' }}" required>
+                    {% if form.district.errors %}
+                        <div class="text-danger">
+                            {% for error in form.district.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="state" class="form-label">State</label>
-                    <input type="text" class="form-control" id="state" name="state" value="{{ address.state|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="state" name="state" value="{{ form.instance.state|default_if_none:'' }}" required>
+                    {% if form.state.errors %}
+                        <div class="text-danger">
+                            {% for error in form.state.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="country" class="form-label">Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="{{ address.country|default_if_none:'India' }}" required>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ form.instance.country|default_if_none:'India' }}" required>
+                    {% if form.country.errors %}
+                        <div class="text-danger">
+                            {% for error in form.country.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="mb-3">
                     <label for="phone_number" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" maxlength="15" value="{{ address.phone_number|default_if_none:'' }}" required>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" maxlength="15" value="{{ form.instance.phone_number|default_if_none:'' }}" required>
+                    {% if form.phone_number.errors %}
+                        <div class="text-danger">
+                            {% for error in form.phone_number.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="is_default" name="is_default" {% if address.is_default %}checked{% endif %}>
+                    <input type="checkbox" class="form-check-input" id="is_default" name="is_default" 
+                           {% if form.instance.is_default %}checked{% endif %}>
                     <label class="form-check-label" for="is_default">Set as Default Address</label>
                 </div>
 
-                <button type="submit" class="btn btn-primary">{% if address %}Update Address{% else %}Add Address{% endif %}</button>
+                <button type="submit" class="btn btn-primary w-100">{% if address %}Update Address{% else %}Add Address{% endif %}</button>
             </form>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

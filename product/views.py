@@ -13,7 +13,7 @@ from django.shortcuts import render
 from .models import Product
 from .filter import ProductFilterForm
 from accounts.models import Wishlist
-
+from django.db.models import Prefetch
 
 def add_product(request):
     if request.method == "POST":
@@ -33,9 +33,6 @@ def add_product(request):
                     if product_data["Product_brand"]
                     else None
                 ),
-                "price": str(product_data["price"]),
-                "offer_price": str(product_data["offer_price"]),
-                "is_active": product_data["is_active"],
             }
             return redirect("product:add-images")
     else:
@@ -77,9 +74,7 @@ def add_images(request):
                     Product_description=product_data["Product_description"],
                     Product_category=category,
                     Product_brand=brand,
-                    price=product_data["price"],
-                    offer_price=product_data["offer_price"],
-                    is_active=product_data["is_active"],
+                    is_active=True,
                 )
                 product.save()
 
@@ -179,8 +174,6 @@ def edit_product(request, product_id):
 
     if request.method == "POST":
         product.Product_name = request.POST.get("product_name")
-        product.price = request.POST.get("price")
-        product.offer_price = request.POST.get("offer_price")
         product.percentage_discount = request.POST.get("percentage_discount")
         product.product_description = request.POST.get("product_description")
         product.is_active = request.POST.get("is_active") == "True"
@@ -279,9 +272,22 @@ def product_detail_page(request, product_id):
     reviews = Review.objects.filter(Product=product)
     avg_rating = reviews.aggregate(Avg("rating"))["rating__avg"]
 
+    related_products_with_variants = []
+
     related_products = Product.objects.filter(
         Product_category=product.Product_category
-    ).exclude(id=product.id)[:4]
+    ).exclude(id=product.id).prefetch_related(
+        Prefetch('productvariant_set', queryset=ProductVariant.objects.order_by('id'))
+    )[:4]
+
+    # Prepare the data for the template
+    for related_product in related_products:
+        first_variant = related_product.productvariant_set.first() 
+        related_products_with_variants.append({
+            "product": related_product,
+            "variant_price": first_variant.price if first_variant else None,
+            "variant_offer_price": first_variant.offer_price if first_variant else None
+        })
 
     wishlist_variant_ids = Wishlist.objects.filter(user=request.user).values_list('variant_id', flat=True)
 
@@ -317,7 +323,7 @@ def product_detail_page(request, product_id):
             "reviews": reviews,
             "avg_rating": avg_rating,
             "review_form": review_form,
-            "related_products": related_products,
+            "related_products": related_products_with_variants,
             "wishlist_variant_ids": wishlist_variant_ids,
             "selected_variant": selected_variant,
         },

@@ -1,6 +1,7 @@
 {% extends 'adminside/base.html' %}
 
 {% block content %}
+
 <h1>{{ action }} Coupon</h1>
 
 <form method="post" novalidate>
@@ -24,4 +25,3 @@
     <a href="{% url 'coupons:coupon_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}
-

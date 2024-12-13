@@ -34,7 +34,6 @@ SECRET_KEY = config('SECRET_KEY')
 
 ALLOWED_HOSTS = ['*']
 
-# settings.py
 
 AUTH_USER_MODEL = 'nutri_auth.User'
 
@@ -143,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 

@@ -1,0 +1,44 @@
+{% extends 'adminside/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Manage Return Requests</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Reason for Return</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for return_order in returns %}
+            <tr>
+                <td>{{ return_order.order.order_id }}</td>
+                <td>{{ return_order.order.user.username }}</td>
+                <td>{{ return_order.reason }}</td>
+                <td>{{ return_order.date_requested }}</td>
+                <td>{{ return_order.status }}</td>
+                <td>
+                    <!-- Update Status Form -->
+                    <form method="post" action="{% url 'order:admin_update_return' return_order.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="return_id" value="{{ return_order.id }}">
+                        <select name="status" class="form-select mb-2">
+                           
+                            <option value="Approved" {% if return_order.status == 'Approved' %}selected{% endif %}>Approved</option>
+                            <option value="Rejected" {% if return_order.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                            
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

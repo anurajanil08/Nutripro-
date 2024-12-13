@@ -14,17 +14,28 @@ from django.db.models import F
 from coupons.models import Coupon, CouponUsage
 from django.db.models import F, Q
 from django.utils import timezone
-
-
+from order.models import Order
+from django.utils.timezone import now
+from order.models import Order, OrderAddress
+from django.utils.crypto import get_random_string
+from nutri_auth.models import User
 
 @login_required
 def add_to_cart(request, variant_id):
-    print("add_to_cart view accessed") 
     if request.method == 'POST':
+        
         variant = get_object_or_404(ProductVariant, id=variant_id)
-        product = variant.Product 
-        quantity = int(request.POST.get('quantity', 1))
-        print(f"Variant ID: {variant_id}, Quantity: {quantity}")  
+        product = variant.Product  
+        stock = variant.stock  
+        quantity = int(request.POST.get('quantity', 1))  
+
+        
+        if quantity < 1 or quantity > MAX_QUANTITY:
+            return JsonResponse({'success': False, 'message': f'Quantity must be between 1 and {MAX_QUANTITY}.'})
+
+        
+        if quantity > stock:
+            return JsonResponse({'success': False, 'message': 'Insufficient stock available.'})
 
         
         cart, created = Cart.objects.get_or_create(user=request.user)
@@ -32,28 +43,31 @@ def add_to_cart(request, variant_id):
         
         cart_item, item_created = CartItem.objects.get_or_create(
             cart=cart,
-            product=product,  
+            product=product,
             variant=variant,
-            defaults={'quantity': quantity}
+            defaults={'quantity': 0}  
         )
 
-      
-        if not item_created:
-            if cart_item.quantity + quantity > MAX_QUANTITY:
-                return JsonResponse({'success': False, 'message': f'Cannot add more than {MAX_QUANTITY} items of this product.'})
-            cart_item.quantity += quantity
-            cart_item.save()
-        elif quantity > MAX_QUANTITY:
+        
+        total_quantity = cart_item.quantity + quantity
+
+        
+        if total_quantity > MAX_QUANTITY:
             return JsonResponse({'success': False, 'message': f'Cannot add more than {MAX_QUANTITY} items of this product.'})
 
-        print(f"Cart item added: {cart_item}") 
+        
+        cart_item.quantity = total_quantity
+        cart_item.save()
 
-        return JsonResponse({'success': True, 'message': 'Item added to cart'})
-    
-    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+        return JsonResponse({'success': True, 'message': 'Item added to cart.'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+
 
 
 MAX_QUANTITY = 5
+
+
 
 @login_required
 def view_cart(request):
@@ -71,11 +85,18 @@ def view_cart(request):
 
 @require_POST
 def update_cart_item(request, item_id):
-    """Update the quantity of a specific cart item"""
+   
     try:
         item = get_object_or_404(CartItem, id=item_id)
         data = json.loads(request.body)
         new_quantity = data.get('quantity', 1)
+
+
+        if new_quantity > item.variant.stock:  
+            return JsonResponse({
+                'success': False,
+                'message': f'Only {item.variant.stock} units are available for this product.'
+            })
 
         if new_quantity > MAX_QUANTITY:
             return JsonResponse({'success': False, 'message': f'Quantity cannot exceed {MAX_QUANTITY}.'})
@@ -96,7 +117,7 @@ def update_cart_item(request, item_id):
 
 
 def remove_from_cart(request, item_id):
-    """Remove a specific item from the cart."""
+    
     if request.method == 'POST':
         try:
             
@@ -118,41 +139,50 @@ def remove_from_cart(request, item_id):
         return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 def calculate_total_price():
-    """Helper function to calculate total cart price"""
+    
     
     return CartItem.objects.aggregate(total=models.Sum('sub_total'))['total'] or 0
 
 
+from django.utils.timezone import now
+from django.db.models import Q, F
+
 def checkout(request):
+    
     user_cart = Cart.objects.filter(user=request.user).first()
-    if not user_cart:
+    cart_items = CartItem.objects.filter(cart=user_cart, is_active=True) if user_cart else []
+
+
+    if not user_cart or not cart_items:
         messages.error(request, "Your cart is empty.")
+        print('Cart is empty or inactive items.')
         return redirect('cart:view_cart')
 
-    cart_items = CartItem.objects.filter(cart=user_cart, is_active=True)
-    invalid_items = []
+    critical_error = False
 
     for item in cart_items:
-        if not item.variant.variant_status or item.variant.stock < item.quantity:
-            invalid_items.append(item)
+        print(f"Checking item: {item}")
+        if not item.product.is_active:
+            messages.error(request, f"{item.product.Product_name} is currently unavailable.")
+            critical_error = True
+        elif not item.variant.variant_status:
+            messages.error(request, f"{item.variant.Product.Product_name} ({item.variant.size}g) is currently unavailable.")
+            critical_error = True
+        elif item.variant.stock < item.quantity:
+            messages.error(request, f"{item.variant.Product.Product_name} ({item.variant.size}g) does not have enough stock.")
+            critical_error = True
 
-    # Handle invalid items
-    if invalid_items:
-        for item in invalid_items:
-            messages.error(
-                request,
-                f"Item {item.variant.Product.Product_name} ({item.variant.size}) is not available or has insufficient stock."
-            )
+    if critical_error:
         return redirect('cart:view_cart')
 
-    # Calculate total price using the Cart model's method
-    total_price = user_cart.get_cart_total()
+    total_price = sum(item.sub_total() for item in cart_items)
 
     addresses = request.user.addresses.all()
 
+
     valid_coupons = Coupon.objects.filter(
-    is_active=True,
-    expiry_date__gte=timezone.now()
+        is_active=True,
+        expiry_date__gte=now()
     ).exclude(
         Q(usages__user=request.user) & Q(usages__times_used__gte=F('max_usage'))
     ).distinct()
@@ -163,9 +193,11 @@ def checkout(request):
         'total_price': total_price,
         'addresses': addresses,
         'coupons': valid_coupons,
-
     }
+
     return render(request, 'userside/cart/checkout.html', context)
+
+
 
 
 def add_address(request):

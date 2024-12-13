@@ -47,7 +47,7 @@
                                 <td>{% if products.Product_brand %}{{ products.Product_brand.brand_name }}{% else %}No brand{% endif %}</td>
                             </tr>
 
-                            <!-- Price -->
+                            {% comment %} <!-- Price -->
                             <tr>
                                 <th scope="row">Price</th>
                                 <td id="priceDisplay">{{ products.price }}</td>
@@ -63,7 +63,7 @@
                             <tr>
                                 <th scope="row">Discount</th>
                                 <td>{{ products.percentage_discount }}%</td>
-                            </tr>
+                            </tr> {% endcomment %}
 
                             <!-- Status -->
                             <tr>

@@ -1,34 +1,70 @@
 {% for item in product_data %}
-    <div class="product-card">
-        <div class="product-image">
-            {% if item.images.exists %}
-                <a href="{% url 'product:product-detail-page' item.product.id %}" class="product-link">
-                    <img src="{{ item.images.first.images.url }}" alt="{{ item.product.Product_name }}">
-                </a>
+<div class="product-card">
+    <!-- Product Image -->
+    <div class="product-image">
+        {% if item.images.exists %}
+            <a href="{% url 'product:product-detail-page' item.product.id %}" class="product-link">
+                <img src="{{ item.images.first.images.url }}" alt="{{ item.product.Product_name }}">
+            </a>
+        {% else %}
+            {% comment %} <img src="{% static 'images/default-product.png' %}" alt="Default Image"> {% endcomment %}
+        {% endif %}
+        <div class="product-label">
+            {% if item.variant.offer_price %}
+                <span class="sale">-{{ item.variant.percentage_discount }}%</span>
             {% endif %}
-            <div class="product-label">
-                {% if item.product.is_on_sale %}
-                    <span class="sale">-{{ item.product.discount_percentage }}%</span>
-                {% endif %}
-                {% if item.product.is_new %}
-                    <span class="new">NEW</span>
-                {% endif %}
-            </div>
-        </div>
-        <div class="product-body">
-            <p class="product-category">{{ item.product.Product_category.category_name }}</p>
-            <h3 class="product-name"><a href="#">{{ item.product.Product_name }}</a></h3>
-            <h4 class="product-price">₹{{ item.product.offer_price }}
-                <del class="product-old-price">₹{{ item.product.price }}</del>
-            </h4>
-            <div class="product-rating">
-                {% for i in "12345" %}
-                    <i class="fa fa-star"></i>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="add-to-cart">
-            <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+            {% if item.product.is_active %}
+                <span class="new">AVAILABLE</span>
+            {% else %}
+                <span class="new text-danger">OUT OF STOCK</span>
+            {% endif %}
         </div>
     </div>
+
+    <!-- Product Body -->
+    <div class="product-body">
+        <!-- Product Category -->
+        <p class="product-category">
+            {{ item.product.Product_category.category_name|default:"No Category" }}
+        </p>
+
+        <!-- Product Name -->
+        <h3 class="product-name">
+            <a href="{% url 'product:product-detail-page' item.product.id %}">
+                {{ item.product.Product_name|default:"Unnamed Product" }}
+            </a>
+        </h3>
+
+        <!-- Variant Information -->
+        <p class="product-variant">
+            {% if item.variant.size %}
+                <span>Size: {{ item.variant.size }}</span>
+            {% endif %}
+        </p>
+
+      <!-- Variant Price -->
+    <h4 class="product-price">
+        {% if item.variant and item.variant.offer_price %}
+            ₹{{ item.variant.offer_price }}
+        {% elif item.variant %}
+            ₹{{ item.variant.price }}
+        {% else %}
+            Price not available
+        {% endif %}
+        {% if item.variant and item.variant.offer_price %}
+            <del class="product-old-price">₹{{ item.variant.price }}</del>
+        {% endif %}
+    </h4>
+
+        <!-- Product Rating -->
+        <div class="product-rating">
+            {% for i in "12345" %}
+                <i class="fa fa-star"></i>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endfor %}
+
+
+
