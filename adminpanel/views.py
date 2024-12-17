@@ -24,6 +24,11 @@ from category.models import Category
 from brand.models import Brand
 from product.models import Product
 from django.http import JsonResponse
+from django.db.models.functions import TruncDate
+
+
+
+
 
 # Create your views here.
 
@@ -98,7 +103,6 @@ def custom_logout_view(request):
 
 
 
-
 @admin_required
 def sales_report(request):
     start_date = request.GET.get('start_date')
@@ -108,12 +112,27 @@ def sales_report(request):
     page_number = request.GET.get('page', 1)
 
     orders = Order.objects.all()
+     
+    if start_date and end_date and start_date == end_date:
+        try:
+            single_day = datetime.strptime(start_date, "%Y-%m-%d").date()
+            orders = orders.annotate(date_only=TruncDate('date')).filter(date_only=single_day)
+        except ValueError:
+            pass  
 
-   
-    if start_date and end_date:
-        orders = orders.filter(date__range=[start_date, end_date])
+    
+    elif start_date and end_date:
+        try:
+            orders = orders.filter(date__range=[start_date, end_date])
+        except ValueError:
+            pass  
+
+    
     if month and year:
         orders = orders.filter(date__month=month, date__year=year)
+
+    total_sales = orders.aggregate(total=Sum('total_amount'))['total'] or 0
+ 
 
     paginator = Paginator(orders, 10)  
     page_obj = paginator.get_page(page_number)
@@ -147,6 +166,7 @@ def sales_report(request):
             if y < 50:  
                 pdf.showPage()
                 y = 750
+        pdf.drawString(100, y - 40, f"Total Sales: {total_sales}")
 
         pdf.save()
         buffer.seek(0)
@@ -171,6 +191,7 @@ def sales_report(request):
                 order.total_amount,
                 order.date.strftime("%Y-%m-%d"),
             ])
+        worksheet.append(["", "Total Sales", total_sales, ""])    
 
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -195,6 +216,7 @@ def sales_report(request):
         'month': month,
         'year': year,
         "selected_month": selected_month,
+        "total_sales": total_sales,
     }
     return render(request, 'adminside/sales.html', context)
 

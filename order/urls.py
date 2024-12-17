@@ -16,6 +16,6 @@ urlpatterns = [
     path('returns/', views.manage_returns, name='admin_manage_returns'),
     path('returns/update/<int:return_id>/', views.update_return_status, name='admin_update_return'),
     path('request-return/<str:order_id>/', views.request_return, name='request_return'),
-
-   
+    path('retry_payment/<int:order_id>/', views.retry_payment, name='retry_payment'),
+  
 ]

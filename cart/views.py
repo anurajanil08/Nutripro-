@@ -19,11 +19,12 @@ from django.utils.timezone import now
 from order.models import Order, OrderAddress
 from django.utils.crypto import get_random_string
 from nutri_auth.models import User
+from django.utils.timezone import now
+from django.db.models import Q, F
 
 @login_required
 def add_to_cart(request, variant_id):
     if request.method == 'POST':
-        
         variant = get_object_or_404(ProductVariant, id=variant_id)
         product = variant.Product  
         stock = variant.stock  
@@ -65,16 +66,25 @@ def add_to_cart(request, variant_id):
 
 
 
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Sum
+import json
+
+# Constants
 MAX_QUANTITY = 5
-
-
 
 @login_required
 def view_cart(request):
+    """
+    Render the cart page with initial cart items.
+    """
     cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.select_related('product', 'variant') 
+    cart_items = cart.items.select_related('product', 'variant')
     total_quantity = sum(item.quantity for item in cart_items)
-    total_price = sum(item.sub_total() for item in cart_items)
+    total_price = sum(float(item.sub_total()) for item in cart_items)
 
     return render(request, 'userside/cart/view_cart.html', {
         'cart_items': cart_items,
@@ -83,69 +93,169 @@ def view_cart(request):
     })
 
 
+@login_required
 @require_POST
-def update_cart_item(request, item_id):
-   
+def update_cart_ajax(request):
+    """
+    AJAX endpoint to dynamically update cart item quantity.
+    """
     try:
-        item = get_object_or_404(CartItem, id=item_id)
         data = json.loads(request.body)
-        new_quantity = data.get('quantity', 1)
+        item_id = data.get('item_id')
+        action = data.get('action', 'update')
 
+        item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
 
-        if new_quantity > item.variant.stock:  
-            return JsonResponse({
-                'success': False,
-                'message': f'Only {item.variant.stock} units are available for this product.'
-            })
+        if action == 'update':
+            new_quantity = int(data.get('quantity', 1))
 
-        if new_quantity > MAX_QUANTITY:
-            return JsonResponse({'success': False, 'message': f'Quantity cannot exceed {MAX_QUANTITY}.'})
-        elif new_quantity < 1:
-            item.delete()
-            return JsonResponse({'success': True, 'deleted': True, 'total_price': calculate_total_price()})
-        
-        item.quantity = new_quantity
-        item.save()
+            # Validate and update quantity
+            valid, message = validate_quantity(item, new_quantity)
+            print(valid)
+            if not valid:
+                print("not valit")
+                return JsonResponse({'success': False, 'message': message})
 
-        return JsonResponse({
-            'success': True,
-            'subtotal': item.sub_total,  
-            'total_price': calculate_total_price()  
-        })
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-
-def remove_from_cart(request, item_id):
-    
-    if request.method == 'POST':
-        try:
-            
-            item = get_object_or_404(CartItem, id=item_id)
-            item.delete()
-
-            
-            total_price = calculate_total_price(request.user.cart) if hasattr(request.user, 'cart') else 0
+            item.quantity = new_quantity
+            item.save()
 
             return JsonResponse({
                 'success': True,
-                'total_price': total_price
+                'action': 'update',
+                'item_id': item.id,
+                'quantity': item.quantity,
+                'subtotal': float(item.sub_total()),
+                'total_price': calculate_total_price(request.user)
             })
-        except Exception as e:
-            
-            print(f"Error removing item from cart: {e}")
-            return JsonResponse({'success': False, 'error': 'An error occurred while removing the item.'})
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
-def calculate_total_price():
-    
-    
-    return CartItem.objects.aggregate(total=models.Sum('sub_total'))['total'] or 0
+        elif action == 'remove':
+            item.delete()
+
+            return JsonResponse({
+                'success': True,
+                'action': 'remove',
+                'item_id': item_id,
+                'total_price': calculate_total_price(request.user)
+            })
+
+        return JsonResponse({'success': False, 'message': 'Invalid action'}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
-from django.utils.timezone import now
-from django.db.models import Q, F
+def validate_quantity(item, quantity):
+    """
+    Validate the quantity for a cart item.
+    Returns a tuple (is_valid, message).
+    """
+    # Remove the item if quantity is less than 1
+    if quantity < 1:
+        item.delete()
+        return False, 'Item removed from cart.'
+
+    # Check stock availability
+    if quantity > item.variant.stock:
+        return False, f'Only {item.variant.stock} units available.'
+
+    # Set a maximum quantity limit
+    MAX_QUANTITY = 5  
+    if quantity > MAX_QUANTITY:
+        return False, f'Maximum quantity is {MAX_QUANTITY}.'
+
+    return True, ''
+
+
+def calculate_total_price(user):
+    """
+    Calculate total price for a user's cart.
+    """
+    try:
+        cart = Cart.objects.get(user=user)
+        return sum(
+            float(item.sub_total())
+            for item in cart.items.select_related('variant', 'product')
+        )
+    except Cart.DoesNotExist:
+        return 0.0
+
+
+@login_required
+def get_cart_summary(request):
+    """
+    AJAX endpoint to get current cart summary.
+    """
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cart_items = cart.items.select_related('product', 'variant')
+
+        items_data = []
+        for item in cart_items:
+            items_data.append({
+                'id': item.id,
+                'product_name': item.product.Product_name,
+                'variant': item.variant.size,
+                'quantity': item.quantity,
+                'price': float(item.variant.offer_price) if item.variant.offer_price else 0.0,
+                'subtotal': float(item.sub_total()),
+                'thumbnail': item.product.thumbnail.url if item.product.thumbnail else None
+            })
+
+        return JsonResponse({
+            'success': True,
+            'items': items_data,
+            'total_price': calculate_total_price(request.user)
+        })
+    except Cart.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Cart not found.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def checkout(request):
     

@@ -21,33 +21,58 @@ def admin_coupon_list(request):
 
 @login_required
 
+# def admin_create_coupon(request, id=None):
+#     if id: 
+#         coupon = get_object_or_404(Coupon, id=id)
+#         action = 'Edit'
+#     else:
+#         coupon = None
+#         action = 'Create'
+
+#     if request.method == 'POST':
+#         form = CouponForm(request.POST, instance=coupon)  
+#         if form.is_valid():
+#             form.save()
+#             if id:
+#                 messages.success(request, 'Coupon updated successfully.')
+#             else:
+#                 messages.success(request, 'Coupon created successfully.')
+#             return redirect('coupons:coupon_list')  
+#         else:
+#             messages.error(request, 'Error saving coupon.')
+#     else:
+#         form = CouponForm(instance=coupon)  
+
+#     return render(request, 'adminside/coupons/edit_coupon.html', {
+#         'form': form,
+#         'action': action,
+#     })
 def admin_create_coupon(request, id=None):
-    if id: 
+    coupon = None
+    action = 'Create'
+
+    if id:
         coupon = get_object_or_404(Coupon, id=id)
         action = 'Edit'
-    else:
-        coupon = None
-        action = 'Create'
 
     if request.method == 'POST':
-        form = CouponForm(request.POST, instance=coupon)  
+        form = CouponForm(request.POST, instance=coupon)
         if form.is_valid():
             form.save()
-            if id:
-                messages.success(request, 'Coupon updated successfully.')
-            else:
-                messages.success(request, 'Coupon created successfully.')
-            return redirect('coupons:coupon_list')  
+            messages.success(
+                request,
+                f"Coupon {'updated' if id else 'created'} successfully."
+            )
+            return redirect('coupons:coupon_list')  # Update this to the correct URL name
         else:
-            messages.error(request, 'Error saving coupon.')
+            messages.error(request, 'Error saving coupon. Please correct the errors below.')
     else:
-        form = CouponForm(instance=coupon)  
+        form = CouponForm(instance=coupon)
 
     return render(request, 'adminside/coupons/edit_coupon.html', {
         'form': form,
         'action': action,
     })
-
 
 
 @login_required
@@ -75,76 +100,7 @@ def admin_toggle_coupon_status(request, id):
 
 
 
-# def apply_coupon(request):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body)
-#             coupon_code = data.get("coupon_code")
-            
-#             order_amount = Decimal(str(data.get("order_amount")))
 
-            
-#             coupon = get_object_or_404(Coupon, code=coupon_code)
-
-#             print(coupon)
-
-            
-#             if order_amount < Decimal(str(coupon.minimum_order_amount)):
-#                 return JsonResponse({
-#                     "success": False, 
-#                     "message": f"Minimum order amount is ₹{coupon.minimum_order_amount}"
-#                 })
-
-            
-#             discount_percentage = Decimal(str(coupon.discount_percentage)) / Decimal('100')
-
-#             print(discount_percentage)
-#             discount = min(
-#                 discount_percentage * order_amount, 
-#                 Decimal(str(coupon.max_discount_amount))
-#             ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
-#             print("discount",discount)
-
-            
-#             final_total = (order_amount - discount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-
-#             print("final_total",final_total)
-
-            
-#             request.session['applied_coupon'] = {
-#                 'code': coupon.code,
-#                 'discount': float(discount),  
-#                 'final_total': float(final_total)
-#             }
-
-#             return JsonResponse({
-#                 "success": True,
-#                 "discount": float(discount),
-#                 "final_total": float(final_total),
-#                 "message": f"Coupon {coupon_code} applied successfully!"
-#             })
-
-#         except Coupon.DoesNotExist:
-#             return JsonResponse({
-#                 "success": False, 
-#                 "message": "Invalid coupon code."
-#             })
-#         except (TypeError, ValueError) as e:
-#             return JsonResponse({
-#                 "success": False, 
-#                 "message": f"Invalid input: {str(e)}"
-#             })
-#         except Exception as e:
-#             return JsonResponse({
-#                 "success": False, 
-#                 "message": str(e)
-#             })
-
-#     return JsonResponse({
-#         "success": False, 
-#         "message": "Invalid request method."
-#     })
 
 def apply_coupon(request):
     if request.method == "POST":

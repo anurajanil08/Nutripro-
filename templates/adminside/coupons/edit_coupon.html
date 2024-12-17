@@ -1,27 +1,144 @@
 {% extends 'adminside/base.html' %}
-
 {% block content %}
+<style>
+    .coupon-form-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-<h1>{{ action }} Coupon</h1>
+    .coupon-form-container h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+    }
 
-<form method="post" novalidate>
-    {% csrf_token %}
-    <div class="form-group">
-        {{ form.non_field_errors }}
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .text-danger ul {
+        padding-left: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .form-text.text-muted {
+        color: #6c757d;
+        font-size: 0.75rem;
+    }
+
+    .btn-submit-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        padding: 0.5rem 2rem;
+        background-color: #007bff;
+        border: none;
+        border-radius: 0.25rem;
+        color: white;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        width: auto;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 1.25rem;
+    }
+</style>
+
+<div class="coupon-form-container">
+    <h2>{{ action }} Coupon</h2>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {# Display non-field errors (errors not tied to a specific field) #}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
                 {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {# Loop through each field in the form #}
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {# Render the field normally (without using filters) #}
+            {{ field }}
+
+            {# Display field-specific errors #}
+            {% if field.errors %}
+            <div class="text-danger">
+                <ul>
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
+            {% endif %}
+            
+            {# Display help text, if any #}
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
         {% endfor %}
-    </div>
-    <button type="submit" class="btn btn-primary">{{ action }} Coupon</button>
-    <a href="{% url 'coupons:coupon_list' %}" class="btn btn-secondary">Cancel</a>
-</form>
+
+        <div class="btn-submit-container">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
