@@ -31,7 +31,7 @@
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="{% static 'adminside/assets/css/themify-icons.css' %}" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
 
 </head>
@@ -57,49 +57,49 @@
             <ul class="nav">
                 <li >
                     <a href="{% url 'adminpanel:dashboard' %}">
-                        <i class="ti-panel"></i>
+                        <i class="fa-solid fa-clipboard-list"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url  'adminpanel:userlist' %}">
-                        <i class="ti-user"></i>
+                        <i class="fa-solid fa-users"></i>
                         <p>User Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'category:listcategory' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-solid fa-sitemap"></i>
                         <p>Category Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'brand:brandlist' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-solid fa-circle-check"></i>
                         <p>Brand Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'product:list-product' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-brands fa-shopify"></i>
                         <p>Product Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'order:admin_order_list' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-solid fa-truck"></i>
                         <p>Order Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'coupons:coupon_list' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-solid fa-ticket"></i>
                         <p>Coupon Management</p>
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'order:admin_manage_returns' %}">
-                        <i class="ti-view-list-alt"></i>
+                        <i class="fa-solid fa-rotate-left"></i>
                         <p>Return Management</p>
                     </a>
                 </li>

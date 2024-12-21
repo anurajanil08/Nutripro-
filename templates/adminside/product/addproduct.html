@@ -82,41 +82,58 @@
     }
 </style>
 
-<div class="form-container">
-    <div class="form-box">
-        <h2>Add Product</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_Product_name">Product Name</label>
-                {{ form.Product_name }}
-                {% if form.Product_name.errors %}
-                    <span class="error">{{ form.Product_name.errors.0 }}</span>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label for="id_Product_description">Product Description</label>
-                {{ form.Product_description }}
-                {% if form.Product_description.errors %}
-                    <span class="error">{{ form.Product_description.errors.0 }}</span>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label for="id_Product_category">Product Category</label>
-                {{ form.Product_category }}
-                {% if form.Product_category.errors %}
-                    <span class="error">{{ form.Product_category.errors.0 }}</span>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label for="id_Product_brand">Product Brand</label>
-                {{ form.Product_brand }}
-                {% if form.Product_brand.errors %}
-                    <span class="error">{{ form.Product_brand.errors.0 }}</span>
-                {% endif %}
-            </div>
-            <button type="submit">Add Product</button>
-        </form>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Add Product</h2>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Product Name -->
+                <div class="mb-3">
+                    <label for="id_Product_name" class="form-label">Product Name</label>
+                    {{ form.Product_name|add_class:"form-control" }}
+                    {% if form.Product_name.errors %}
+                        <div class="text-danger small">{{ form.Product_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Product Description -->
+                <div class="mb-3">
+                    <label for="id_Product_description" class="form-label">Product Description</label>
+                    {{ form.Product_description|add_class:"form-control" }}
+                    {% if form.Product_description.errors %}
+                        <div class="text-danger small">{{ form.Product_description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Product Category -->
+                <div class="mb-3">
+                    <label for="id_Product_category" class="form-label">Product Category</label>
+                    {{ form.Product_category|add_class:"form-select" }}
+                    {% if form.Product_category.errors %}
+                        <div class="text-danger small">{{ form.Product_category.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Product Brand -->
+                <div class="mb-3">
+                    <label for="id_Product_brand" class="form-label">Product Brand</label>
+                    {{ form.Product_brand|add_class:"form-select" }}
+                    {% if form.Product_brand.errors %}
+                        <div class="text-danger small">{{ form.Product_brand.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success">Add Product</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
 {% endblock content %}

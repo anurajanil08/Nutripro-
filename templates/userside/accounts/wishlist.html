@@ -61,6 +61,20 @@
             font-size: 16px;
             color: #777;
         }
+        .action-btn {
+            background-color: #ff4d4f; /* Similar red shade as the "Remove" button */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: #ff6666; /* Slightly lighter shade for hover effect */
+        }
 
         /* Remove Button */
         .remove-btn {
@@ -114,12 +128,13 @@
                     </div>
         
                     <!-- Remove Button -->
-                    <button class="remove-btn" onclick="removeFromWishlist({{ item.variant.id }})">Remove</button>
-                    <button onclick="addToCart('{{ item.variant.id }}', '{% url 'cart:add_to_cart' variant_id=item.variant.id %}')">
-                        Add to Cart
-                    </button>
-
-
+                    <div class="button-group">
+                        <button class="remove-btn" onclick="removeFromWishlist({{ item.variant.id }})">Remove</button>
+                        <button class="action-btn" onclick="addToCart('{{ item.variant.id }}', '{% url 'cart:add_to_cart' variant_id=item.variant.id %}')">
+                            Add to Cart
+                        </button>
+                    </div>
+                    
                     
                 </div>
             {% empty %}

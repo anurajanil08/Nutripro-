@@ -15,9 +15,35 @@ from django.views.decorators.http import require_POST
 from .models import Wishlist
 import json
 from django.contrib import messages
+from cart.models import Cart, CartItem
+from order.models import Order
 
 
 # Create your views here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -259,3 +285,50 @@ def remove_from_wishlist(request, variant_id):
         else:
             return JsonResponse({'success': False, 'message': 'Item not found in your wishlist'}, status=404)
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
+
+
+
+
+
+
+
+def get_counts(request):
+    if request.user.is_authenticated:
+        wishlist_count = Wishlist.objects.filter(user=request.user).count()
+        cart = Cart.objects.filter(user=request.user).first()
+        cart_count = CartItem.objects.filter(cart=cart).count() if cart else 0
+    else:
+        wishlist_count = 0
+        cart_count = 0
+
+    return JsonResponse({
+        'wishlist_count': 2,
+        'cart_count': 5,
+    })
+
+
+
+def update_dashboard_stats(request):
+    if request.user.is_authenticated:
+        total_orders = Order.objects.filter(user=request.user).count()
+        wishlist_items = Wishlist.objects.filter(user=request.user).count()
+        saved_addresses = UserAddress.objects.filter(user=request.user).count()
+        cart = Cart.objects.filter(user=request.user).first() 
+        if cart:
+            cart_items = CartItem.objects.filter(cart=cart).count()
+        else:
+            cart_items = 0
+    else:
+        total_orders = 0
+        wishlist_items = 0
+        saved_addresses = 0
+        cart_items = 0
+
+    stats = {
+        'total_orders': total_orders,
+        'wishlist_items': wishlist_items,
+        'saved_addresses': saved_addresses,
+        'cart_items': cart_items,
+    }
+
+    return JsonResponse(stats)

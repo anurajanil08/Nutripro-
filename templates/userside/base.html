@@ -107,23 +107,55 @@
 						<div class="col-md-3 clearfix">
 							<div class="header-ctn">
 								<!-- Wishlist -->
-								<div>
+								{% comment %} <div>
 									<a href="{% url 'accounts:wishlist' %}">
 										<i class="fa fa-heart-o"></i>
 										<span>Your Wishlist</span>
-										{% comment %} <div class="qty">2</div> {% endcomment %}
+										
+										<div class="qty">2</div> 
 									</a>
-								</div>
+								</div> {% endcomment %}
+
+								<div class="wishlist-container">
+									<a href="{% url 'accounts:wishlist' %}" style="position: relative; display: inline-block;">
+											<i class="fa fa-heart-o" style="font-size: 24px;"></i>
+											<span style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
+													{{ dashboard_stats.wishlist_items }}
+											</span>
+									</a>
+							</div>
+							
+							<div class="dropdown">
+									<a href="{% url 'cart:view_cart' %}">
+											<i class="fa fa-shopping-cart"></i>
+											<span id="cart-items" style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
+												{{ dashboard_stats.cart_items }}
+											</span>
+									</a>
+							</div>
+							
+
+								{% comment %} <div class="wishlist-container">
+									<a href="{% url 'accounts:wishlist' %}" style="position: relative; display: inline-block;">
+										<i class="fa fa-heart-o" style="font-size: 24px;"></i>
+										<span style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
+											{{ dashboard_stats.wishlist_items }}
+										</span>
+								</a>
+								
+							</div>
+							
 								<!-- /Wishlist -->
 
 								<!-- Cart -->
 								<div class="dropdown">
 									<a href="{% url 'cart:view_cart' %}">
 											<i class="fa fa-shopping-cart"></i>
-											<span>Your Cart</span>
-											{% comment %} <div class="qty">1</div>  <!-- Total quantity in the cart --> {% endcomment %}
+											<span style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
+												{{ dashboard_stats.cart_items }}
+											</span>
 									</a>
-								</div>
+								</div> {% endcomment %}
 								<!-- /Cart -->
 
 								<!-- Menu Toogle -->
@@ -313,10 +345,26 @@
             {% endif %}
         });
     </script>
-		
-	
-	
-	
 
+		<script>
+			function updateDashboardStats() {
+				console.log("function called")
+					fetch("{% url 'accounts:update_dashboard_stats' %}")  // Replace with the correct URL
+							.then(response => response.json())
+							.then(data => {
+									// Update the dashboard with the new stats
+									document.getElementById('total-orders').textContent = data.total_orders;
+									document.getElementById('wishlist-items').textContent = data.wishlist_items;
+									document.getElementById('saved-addresses').textContent = data.saved_addresses;
+									document.getElementById('cart-items').textContent = data.cart_items;
+							})
+							.catch(error => console.log('Error updating dashboard stats:', error));
+			}
+	
+			// Call the function initially to load the stats
+			window.onload = updateDashboardStats;
+
+		</script>
+	
 	</body>
 </html>

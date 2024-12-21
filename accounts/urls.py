@@ -16,5 +16,8 @@ urlpatterns = [
     path('wishlist/toggle/', views.toggle_wishlist, name='toggle_wishlist'),
     path('view/', views.view_wishlist, name='wishlist'),
     path('wishlist/remove/<int:variant_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('get-counts/', views.get_counts, name='get_counts'),
+    path('update_dashboard_stats/', views.update_dashboard_stats, name='update_dashboard_stats'),
+
 
 ]

@@ -231,10 +231,10 @@
                     <i class="fas fa-credit-card"></i>
                     Wallet
                 </a>
-                {% comment %} <a href="#help" class="nav-link">
+              {% comment %} <a href="#help" class="nav-link">
                     <i class="fas fa-question-circle"></i>
                     Help & Support
-                </a> {% endcomment %}
+                </a>  {% endcomment %}
             </div>
         </div>
 
@@ -259,7 +259,7 @@
                     </div>
                 </div>
 
-                <div class="stat-grid">
+                {% comment %} <div class="stat-grid">
                     <div class="stat-card">
                         <i class="fas fa-shopping-cart fa-2x" style="color: var(--accent-color)"></i>
                         <div class="stat-value">12</div>
@@ -279,6 +279,36 @@
             </div>
         </div>
     </div>
+</div> {% endcomment %}
+
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <i class="fas fa-shopping-cart fa-2x" style="color: var(--accent-color)"></i>
+        <div class="stat-value">{{ dashboard_stats.total_orders }}</div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-heart fa-2x" style="color: var(--accent-color)"></i>
+        <div class="stat-value">{{ dashboard_stats.wishlist_items }}</div>
+        <div class="stat-label">Wishlist Items</div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-map-marker-alt fa-2x" style="color: var(--accent-color)"></i>
+        <div class="stat-value">{{ dashboard_stats.saved_addresses }}</div>
+        <div class="stat-label">Saved Addresses</div>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-shopping-basket fa-2x" style="color: var(--accent-color)"></i>
+        <div class="stat-value">{{ dashboard_stats.cart_items }}</div>
+        <div class="stat-label">Cart Items</div>
+    </div>
 </div>
+
+
+
+
+
+
 
 {% endblock %}
