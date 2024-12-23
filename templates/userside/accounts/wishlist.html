@@ -183,10 +183,13 @@
                     title: data.message,
                     showConfirmButton: false,
                     timer: 1500
+                }).then(()=>{
+                    updateDashboardStats()
                 }).then(() => {
                     location.reload(); // Reload to reflect changes
                 });
             })
+            
             .catch(error => console.error('Error:', error));
         }
         function addToCart(variantId, addToCartUrl) {
@@ -205,11 +208,9 @@
                     title: data.message,
                     showConfirmButton: false,
                     timer: 1500
-                }).then(() => {
-                    if (data.success) {
-                        location.reload(); // Optional: Reload to reflect changes
-                    }
-                });
+                }).then(()=>{
+                    updateDashboardStats()
+                })
             })
             .catch(error => console.error('Error:', error));
         }

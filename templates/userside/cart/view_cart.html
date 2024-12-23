@@ -302,6 +302,9 @@
                         })
                     })
                     .then(response => response.json())
+                    .then(() => {
+                            location.reload(); // Optional: Reload to reflect changes
+                    })
                     .then(data => {
                         if (data.success) {
                             const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
@@ -321,6 +324,7 @@
                             }
 
                             Swal.fire('Removed!', 'Item has been removed from your cart.', 'success');
+                            updateDashboardStats()
                         } else {
                             showToast('error', 'Remove Failed', data.message);
                         }

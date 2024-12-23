@@ -69,6 +69,7 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Product</th>
                         <th>size</th>
                         <th>Quantity</th>
@@ -79,6 +80,7 @@
                 <tbody>
                     {% for item in order.items.all %}
                     <tr>
+                        <td>{{ item.variant.Product.Product_name }}</td>
                         <td>{{ item.variant.Product.Product_name }}</td>
                         <td>{{ item.variant.size }}</td>
                         <td>{{ item.quantity }}</td>

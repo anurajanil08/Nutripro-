@@ -37,7 +37,7 @@
                                 <td>
                                     <div style="display: flex; gap: 10px;">
                                         <!-- Edit button -->
-                                        <form  action="{% url 'brand:editbrand' brand.id %}" method="post">
+                                        <form  action="{% url 'brand:editbrand' brand.id %}" method="get">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-info btn-sm" >Edit</button>
                                         </form>

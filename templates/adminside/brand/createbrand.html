@@ -1,11 +1,55 @@
 {% extends 'adminside/base.html' %}
+
 {% block title %}
-<h1>Create Brand</h1>
+    <h1>Create Brand</h1>
 {% endblock %}
+
 {% block content %}
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
-{% endblock content %}
+<div class="container m-5">
+    <div class="card shadow-sm m-5 p-5">
+        
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Brand Name -->
+                <div class="mb-3">
+                    <label for="{{ form.brand_name.id_for_label }}" class="form-label">Brand Name</label>
+                    <input type="text" name="brand_name" id="{{ form.brand_name.id_for_label }}" 
+                           class="form-control" value="{{ brand.brand_name }}">
+                    {% if form.brand_name.errors %}
+                        <div class="text-danger small">{{ form.brand_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            
+                <!-- Brand Description -->
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Brand Description</label>
+                    <textarea name="description" id="{{ form.description.id_for_label }}" 
+                              class="form-control" rows="5">{{ brand.description }}</textarea>
+                    {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            
+                <!-- Brand Status -->
+                <div class="mb-3">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                    <input type="checkbox" name="status" id="{{ form.status.id_for_label }}" 
+                           class="form-check-input" {% if brand.status %}checked{% endif %}>
+                    {% if form.status.errors %}
+                        <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success btn-lg">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -57,7 +57,6 @@ class Order(models.Model):
         self.final_amount = self.total_amount - self.discount_amount
         super().save(*args, **kwargs)
 
-    # Add this method for aggregated sales
     @staticmethod
     def sales_summary(filter_type=None):
         from django.db.models.functions import TruncMonth, TruncYear

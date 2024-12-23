@@ -285,30 +285,43 @@
 <div class="stat-grid">
     <div class="stat-card">
         <i class="fas fa-shopping-cart fa-2x" style="color: var(--accent-color)"></i>
-        <div class="stat-value">{{ dashboard_stats.total_orders }}</div>
+        <div class="stat-value"><span id="total-orders">{{ dashboard_stats.total_orders }}</span></div>
         <div class="stat-label">Total Orders</div>
     </div>
     <div class="stat-card">
         <i class="fas fa-heart fa-2x" style="color: var(--accent-color)"></i>
-        <div class="stat-value">{{ dashboard_stats.wishlist_items }}</div>
+        <div class="stat-value"><span id="wishlist-items">{{ dashboard_stats.wishlist_items }}</span></div>
         <div class="stat-label">Wishlist Items</div>
     </div>
     <div class="stat-card">
         <i class="fas fa-map-marker-alt fa-2x" style="color: var(--accent-color)"></i>
-        <div class="stat-value">{{ dashboard_stats.saved_addresses }}</div>
+        <div class="stat-value"><span id="saved-addresses">{{ dashboard_stats.saved_addresses }}</span></div>
         <div class="stat-label">Saved Addresses</div>
     </div>
     <div class="stat-card">
         <i class="fas fa-shopping-basket fa-2x" style="color: var(--accent-color)"></i>
-        <div class="stat-value">{{ dashboard_stats.cart_items }}</div>
+        <div class="stat-value"><span id="cart-items">{{ dashboard_stats.cart_items }}</span></div>
         <div class="stat-label">Cart Items</div>
     </div>
 </div>
 
 
+<script>
+    function updateDashboardStats() {
+        fetch('/api/dashboard-stats/')
+                .then(response => response.json())
+                .then(data => {
+                        // Update the UI with the fetched data
+                        document.getElementById('total-orders').innerText = data.total_orders;
+                        document.getElementById('wishlist-items').innerText = data.wishlist_items;
+                        document.getElementById('saved-addresses').innerText = data.saved_addresses;
+                        document.getElementById('cart-items').innerText = data.cart_items;
 
+                        console.log(data.cart_items)
+                })
+                .catch(error => console.error('Error fetching dashboard stats:', error));
+}
 
-
-
+</script>
 
 {% endblock %}

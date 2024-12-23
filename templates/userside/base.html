@@ -11,7 +11,7 @@
 		<!-- Include Font Awesome for star icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-
+		<link rel="icon" type="image/png" href="{% static 'images/nutripro.png' %}" sizes="5500x5500">
 		<!-- Google font -->
 		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
 
@@ -119,7 +119,7 @@
 								<div class="wishlist-container">
 									<a href="{% url 'accounts:wishlist' %}" style="position: relative; display: inline-block;">
 											<i class="fa fa-heart-o" style="font-size: 24px;"></i>
-											<span style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
+											<span  id="wishlist-items" style="position: absolute; top: -16px; left: 70%; transform: translateX(-50%); color: white; background-color: red; font-size: 14px; font-weight: bold; border-radius: 50%; padding: 3px 7px;">
 													{{ dashboard_stats.wishlist_items }}
 											</span>
 									</a>
@@ -348,21 +348,14 @@
 
 		<script>
 			function updateDashboardStats() {
-				console.log("function called")
-					fetch("{% url 'accounts:update_dashboard_stats' %}")  // Replace with the correct URL
-							.then(response => response.json())
-							.then(data => {
-									// Update the dashboard with the new stats
-									document.getElementById('total-orders').textContent = data.total_orders;
-									document.getElementById('wishlist-items').textContent = data.wishlist_items;
-									document.getElementById('saved-addresses').textContent = data.saved_addresses;
-									document.getElementById('cart-items').textContent = data.cart_items;
-							})
-							.catch(error => console.log('Error updating dashboard stats:', error));
-			}
-	
-			// Call the function initially to load the stats
-			window.onload = updateDashboardStats;
+				fetch('/api/dashboard-stats/')
+						.then(response => response.json())
+						.then(data => {
+								document.getElementById('wishlist-items').innerText = data.wishlist_items;
+								document.getElementById('cart-items').innerText = data.cart_items;
+						})
+						.catch(error => console.error('Error fetching dashboard stats:', error));
+		}
 
 		</script>
 	

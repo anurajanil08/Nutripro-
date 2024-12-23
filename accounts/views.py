@@ -308,16 +308,13 @@ def get_counts(request):
 
 
 
-def update_dashboard_stats(request):
+def get_dashboard_stats(request):
     if request.user.is_authenticated:
         total_orders = Order.objects.filter(user=request.user).count()
         wishlist_items = Wishlist.objects.filter(user=request.user).count()
         saved_addresses = UserAddress.objects.filter(user=request.user).count()
-        cart = Cart.objects.filter(user=request.user).first() 
-        if cart:
-            cart_items = CartItem.objects.filter(cart=cart).count()
-        else:
-            cart_items = 0
+        cart = Cart.objects.filter(user=request.user).first()
+        cart_items = CartItem.objects.filter(cart=cart).count() if cart else 0
     else:
         total_orders = 0
         wishlist_items = 0
@@ -330,5 +327,4 @@ def update_dashboard_stats(request):
         'saved_addresses': saved_addresses,
         'cart_items': cart_items,
     }
-
     return JsonResponse(stats)

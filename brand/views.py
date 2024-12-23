@@ -19,19 +19,31 @@ def create_brand(request):
     
     return render(request, 'adminside/brand/createbrand.html', {'form': form})
 
-@admin_required
 def edit_brand(request, pk):
-    print("ertt")
     brand = get_object_or_404(Brand, pk=pk)
+    
     if request.method == 'POST':
         form = BrandForm(request.POST, instance=brand)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Brand updated successfully!')
             return redirect('brand:brandlist')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = BrandForm(instance=brand)
+        # Initialize form with instance data
+        form = BrandForm(instance=brand, initial={
+            'brand_name': brand.brand_name,
+            'description': brand.description,
+            'status': brand.status
+        })
     
-    return render(request, 'adminside/brand/editbrand.html', {'form': form, 'brand': brand})
+    context = {
+        'form': form,
+        'brand': brand,
+    }
+    return render(request, 'adminside/brand/editbrand.html', context)
+
 
 @admin_required
 def brand_list(request):

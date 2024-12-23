@@ -11,8 +11,13 @@ class ProductForm(forms.ModelForm):
             'Product_category', 
             'Product_brand', 
         ]
+        widgets = {
+            'Product_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'Product_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'Product_category': forms.Select(attrs={'class': 'form-select'}),
+            'Product_brand': forms.Select(attrs={'class': 'form-select'}),
+        }
 
-    
     def clean_Product_name(self):
         product_name = self.cleaned_data.get('Product_name')
         if not product_name:
@@ -21,7 +26,6 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError("Product name must be at least 3 characters long.")
         return product_name
 
-    
     def clean_Product_description(self):
         product_description = self.cleaned_data.get('Product_description')
         if not product_description:
@@ -30,21 +34,18 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError("Product description must be at least 10 characters long.")
         return product_description
 
-   
     def clean_Product_category(self):
         product_category = self.cleaned_data.get('Product_category')
         if not product_category:
             raise forms.ValidationError("Please select a product category.")
         return product_category
 
-    
     def clean_Product_brand(self):
         product_brand = self.cleaned_data.get('Product_brand')
         if not product_brand:
             raise forms.ValidationError("Please select a product brand.")
         return product_brand
 
-   
     def clean(self):
         cleaned_data = super().clean()
         product_name = cleaned_data.get('Product_name')
@@ -71,20 +72,17 @@ class ProductVariantForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-       
         if self.initial.get('size') is None:
             self.initial['size'] = ''
 
-    
     def clean_size(self):
         size = self.cleaned_data.get('size')
         if not size:
             raise forms.ValidationError("Size is required.")
-        if not size.isalnum(): 
+        if not size.isalnum():
             raise forms.ValidationError("Size must be alphanumeric.")
         return size
 
-    
     def clean_stock(self):
         stock = self.cleaned_data.get('stock')
         if stock is None:
@@ -93,7 +91,6 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Stock must be a non-negative value.")
         return stock
 
-    
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price is None:
@@ -102,7 +99,6 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Price must be a positive value.")
         return price
 
-    
     def clean_offer_price(self):
         offer_price = self.cleaned_data.get('offer_price')
         price = self.cleaned_data.get('price')
@@ -115,7 +111,6 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError("Offer price must be less than the regular price.")
         return offer_price
 
-    
     def clean_variant_status(self):
         variant_status = self.cleaned_data.get('variant_status')
         if variant_status is None:
@@ -123,15 +118,19 @@ class ProductVariantForm(forms.ModelForm):
         return variant_status
 
 
-
-
-
 class ReviewForm(forms.ModelForm):
-    RATING_CHOICES = [(i, i) for i in range(1, 6)] 
+    RATING_CHOICES = [(i, i) for i in range(1, 6)]  # 1 to 5 rating options
 
-    rating = forms.ChoiceField(choices=RATING_CHOICES, widget=forms.RadioSelect)
-    comment = forms.CharField(widget=forms.Textarea, max_length=500, required=True)
+    rating = forms.ChoiceField(
+        choices=RATING_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+    )
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        max_length=500,
+        required=True,
+    )
 
     class Meta:
         model = Review
-        fields = ['rating', 'comment']        
+        fields = ['rating', 'comment']

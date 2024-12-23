@@ -1,9 +1,50 @@
 {% extends 'adminside/base.html' %}
+
 {% block title %}
 <h1>Edit Brand: {{ brand.brand_name }}</h1>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Update</button>
-</form>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Edit Brand: {{ brand.brand_name }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group mb-3">
+                    <label for="{{ form.brand_name.id_for_label }}">Brand Name</label>
+                    {{ form.brand_name }}
+                    {% if form.brand_name.errors %}
+                        <div class="text-danger">
+                            {{ form.brand_name.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+            
+                <div class="form-group mb-3">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger">
+                            {{ form.description.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+            
+                <div class="form-check mb-3">
+                    {{ form.status }}
+                    <label class="form-check-label" for="{{ form.status.id_for_label }}">
+                        Active Status
+                    </label>
+                </div>
+            
+                <button type="submit" class="btn btn-primary">Update Brand</button>
+                <a href="{% url 'brand:brandlist' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
