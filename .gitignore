@@ -40,7 +40,3 @@ coverage.xml
 # Ignore pytest cache
 .pytest_cache/
 
-
-#remove static and media
-static/
-media/
