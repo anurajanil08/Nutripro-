@@ -7,13 +7,13 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = [
             'Product_name', 
-            'Product_description', 
+            # 'Product_description', 
             'Product_category', 
             'Product_brand', 
         ]
         widgets = {
             'Product_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'Product_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            # 'Product_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'Product_category': forms.Select(attrs={'class': 'form-select'}),
             'Product_brand': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -26,13 +26,13 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError("Product name must be at least 3 characters long.")
         return product_name
 
-    def clean_Product_description(self):
-        product_description = self.cleaned_data.get('Product_description')
-        if not product_description:
-            raise forms.ValidationError("Product description is required.")
-        if len(product_description) < 10:
-            raise forms.ValidationError("Product description must be at least 10 characters long.")
-        return product_description
+    # def clean_Product_description(self):
+    #     product_description = self.cleaned_data.get('Product_description')
+    #     if not product_description:
+    #         raise forms.ValidationError("Product description is required.")
+    #     if len(product_description) < 10:
+    #         raise forms.ValidationError("Product description must be at least 10 characters long.")
+    #     return product_description
 
     def clean_Product_category(self):
         product_category = self.cleaned_data.get('Product_category')

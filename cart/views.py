@@ -21,9 +21,18 @@ from django.utils.crypto import get_random_string
 from nutri_auth.models import User
 from django.utils.timezone import now
 from django.db.models import Q, F
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Sum
+import json
 
 @login_required
 def add_to_cart(request, variant_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Please log in to add items to the cart.'}, status=401)
+
     if request.method == 'POST':
         variant = get_object_or_404(ProductVariant, id=variant_id)
         product = variant.Product  
@@ -66,21 +75,13 @@ def add_to_cart(request, variant_id):
 
 
 
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.db.models import Sum
-import json
 
-# Constants
+
 MAX_QUANTITY = 5
 
 @login_required
 def view_cart(request):
-    """
-    Render the cart page with initial cart items.
-    """
+  
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = cart.items.select_related('product', 'variant')
     total_quantity = sum(item.quantity for item in cart_items)
@@ -96,9 +97,7 @@ def view_cart(request):
 @login_required
 @require_POST
 def update_cart_ajax(request):
-    """
-    AJAX endpoint to dynamically update cart item quantity.
-    """
+  
     try:
         data = json.loads(request.body)
         item_id = data.get('item_id')
@@ -109,7 +108,7 @@ def update_cart_ajax(request):
         if action == 'update':
             new_quantity = int(data.get('quantity', 1))
 
-            # Validate and update quantity
+         
             valid, message = validate_quantity(item, new_quantity)
             print(valid)
             if not valid:
@@ -151,16 +150,16 @@ def validate_quantity(item, quantity):
     Validate the quantity for a cart item.
     Returns a tuple (is_valid, message).
     """
-    # Remove the item if quantity is less than 1
+   
     if quantity < 1:
         item.delete()
         return False, 'Item removed from cart.'
 
-    # Check stock availability
+    
     if quantity > item.variant.stock:
         return False, f'Only {item.variant.stock} units available.'
 
-    # Set a maximum quantity limit
+    
     MAX_QUANTITY = 5  
     if quantity > MAX_QUANTITY:
         return False, f'Maximum quantity is {MAX_QUANTITY}.'

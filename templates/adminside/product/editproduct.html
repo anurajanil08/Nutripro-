@@ -80,6 +80,8 @@
     }
 </style>
 
+
+
 <section class="content-main">
     <div class="content-header text-center">
         <h2 class="content-title">Edit Product</h2>
@@ -112,8 +114,9 @@
                     <div class="mb-4">
                         <label for="category" class="form-label">Category</label>
                         <select id="category" name="product_category" class="form-control">
+                            <option value="" disabled>Select a category</option>
                             {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category.id == products.product_category.id %}selected{% endif %}>
+                            <option value="{{ category.id }}" {% if category.id == products.Product_category.id %}selected{% endif %}>
                                 {{ category.category_name }}
                             </option>
                             {% endfor %}
@@ -123,8 +126,9 @@
                     <div class="mb-4">
                         <label for="brand" class="form-label">Brand</label>
                         <select id="brand" name="product_brand" class="form-control">
+                            <option value="" disabled>Select a brand</option>
                             {% for brand in brands %}
-                            <option value="{{ brand.id }}" {% if brand.id == products.product_brand.id %}selected{% endif %}>
+                            <option value="{{ brand.id }}" {% if brand.id == products.Product_brand.id %}selected{% endif %}>
                                 {{ brand.brand_name }}
                             </option>
                             {% endfor %}
@@ -154,4 +158,9 @@
         </div>
     </div>
 </section>
+
+
+
+
+
 {% endblock content %}

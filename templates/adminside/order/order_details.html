@@ -80,7 +80,18 @@
                 <tbody>
                     {% for item in order.items.all %}
                     <tr>
-                        <td>{{ item.variant.Product.Product_name }}</td>
+                        <td>
+                            {% if item.variant.Product.thumbnail %}
+                            <img src="{{ item.variant.Product.thumbnail.url }}" 
+                                 class="img-fluid rounded" 
+                                 style="width: 50px; height: auto;" 
+                                 alt="{{ item.variant.Product.Product_name }}">
+                            {% else %}
+                            <span>No Image</span>
+                            {% endif %}
+                        </td>
+                        
+                    
                         <td>{{ item.variant.Product.Product_name }}</td>
                         <td>{{ item.variant.size }}</td>
                         <td>{{ item.quantity }}</td>

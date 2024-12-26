@@ -22,7 +22,7 @@ def add_product(request):
             product_data = form.cleaned_data
             request.session["product_data"] = {
                 "Product_name": product_data["Product_name"],
-                "Product_description": product_data["Product_description"],
+                # "Product_description": product_data["Product_description"],
                 "Product_category_id": (
                     product_data["Product_category"].id
                     if product_data["Product_category"]
@@ -148,6 +148,7 @@ def product_detail(request, product_id):
     )
 
 
+
 def product_list(request):
     products = Product.objects.all()
     return render(request, "adminside/product/product.html", {"products": products})
@@ -167,27 +168,37 @@ def toggle_product_status(request, pk):
     )
 
 
+
+
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     categories = Category.objects.all()
     brands = Brand.objects.all()
 
     if request.method == "POST":
+       
         product.Product_name = request.POST.get("product_name")
         product.percentage_discount = request.POST.get("percentage_discount")
         product.product_description = request.POST.get("product_description")
         product.is_active = request.POST.get("is_active") == "True"
+
+        
         category_id = request.POST.get("product_category")
-        brand_id = request.POST.get("product_brand")
-
         if category_id:
-            product.product_category = get_object_or_404(Category, id=category_id)
-        if brand_id:
-            product.product_brand = get_object_or_404(Brand, id=brand_id)
+            product.Product_category = get_object_or_404(Category, id=category_id)
 
+      
+        brand_id = request.POST.get("product_brand")
+        if brand_id:
+            product.Product_brand = get_object_or_404(Brand, id=brand_id)
+
+        
         product.save()
+
+        
         return redirect("product:list-product")
 
+    
     return render(
         request,
         "adminside/product/editproduct.html",
@@ -197,6 +208,18 @@ def edit_product(request, product_id):
             "brands": brands,
         },
     )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def product_variant(request, product_id):
@@ -265,36 +288,106 @@ def toggle_variant_status(request, variant_id):
 
 
 
+# def product_detail_page(request, product_id):
+#     product = get_object_or_404(Product, id=product_id)
+#     images = ProductImages.objects.filter(Product=product)
+#     variants = ProductVariant.objects.filter(Product=product, variant_status=True)
+#     reviews = Review.objects.filter(Product=product)
+#     avg_rating = reviews.aggregate(Avg("rating"))["rating__avg"]
+
+#     related_products_with_variants = []
+
+#     related_products = Product.objects.filter(
+#         Product_category=product.Product_category
+#     ).exclude(id=product.id).prefetch_related(
+#         Prefetch('productvariant_set', queryset=ProductVariant.objects.order_by('id'))
+#     )[:4]
+
+#     # Prepare the data for the template
+#     for related_product in related_products:
+#         first_variant = related_product.productvariant_set.first() 
+#         related_products_with_variants.append({
+#             "product": related_product,
+#             "variant_price": first_variant.price if first_variant else None,
+#             "variant_offer_price": first_variant.offer_price if first_variant else None
+#         })
+
+#     wishlist_variant_ids = Wishlist.objects.filter(user=request.user).values_list('variant_id', flat=True)
+
+    
+#     selected_variant = variants.first()
+
+    
+#     variant_id = request.GET.get("variant_id")
+#     if variant_id:
+#         try:
+#             selected_variant = variants.get(id=variant_id)
+#         except ProductVariant.DoesNotExist:
+#             selected_variant = variants.first()  
+
+#     review_form = ReviewForm()
+
+#     if request.method == "POST":
+#         review_form = ReviewForm(request.POST)
+#         if review_form.is_valid():
+#             review = review_form.save(commit=False)
+#             review.user = request.user
+#             review.Product = product
+#             review.save()
+#             return redirect("product:product-detail-page", product_id=product.id)
+
+#     return render(
+#         request,
+#         "userside/product/product.html",
+#         {
+#             "product": product,
+#             "images": images,
+#             "variants": variants,
+#             "reviews": reviews,
+#             "avg_rating": avg_rating,
+#             "review_form": review_form,
+#             "related_products": related_products_with_variants,
+#             "wishlist_variant_ids": wishlist_variant_ids,
+#             "selected_variant": selected_variant,
+#         },
+#     )
+
+
+
+
 def product_detail_page(request, product_id):
+    
     product = get_object_or_404(Product, id=product_id)
+    
+   
     images = ProductImages.objects.filter(Product=product)
     variants = ProductVariant.objects.filter(Product=product, variant_status=True)
     reviews = Review.objects.filter(Product=product)
     avg_rating = reviews.aggregate(Avg("rating"))["rating__avg"]
 
+    
     related_products_with_variants = []
-
     related_products = Product.objects.filter(
         Product_category=product.Product_category
     ).exclude(id=product.id).prefetch_related(
         Prefetch('productvariant_set', queryset=ProductVariant.objects.order_by('id'))
     )[:4]
 
-    # Prepare the data for the template
     for related_product in related_products:
-        first_variant = related_product.productvariant_set.first() 
+        first_variant = related_product.productvariant_set.first()
         related_products_with_variants.append({
             "product": related_product,
             "variant_price": first_variant.price if first_variant else None,
             "variant_offer_price": first_variant.offer_price if first_variant else None
         })
 
-    wishlist_variant_ids = Wishlist.objects.filter(user=request.user).values_list('variant_id', flat=True)
+   
+    wishlist_variant_ids = []
+    if request.user.is_authenticated:
+        wishlist_variant_ids = Wishlist.objects.filter(user=request.user).values_list('variant_id', flat=True)
 
-    
+   
     selected_variant = variants.first()
-
-    
     variant_id = request.GET.get("variant_id")
     if variant_id:
         try:
@@ -302,9 +395,9 @@ def product_detail_page(request, product_id):
         except ProductVariant.DoesNotExist:
             selected_variant = variants.first()  
 
+   
     review_form = ReviewForm()
-
-    if request.method == "POST":
+    if request.method == "POST" and request.user.is_authenticated:
         review_form = ReviewForm(request.POST)
         if review_form.is_valid():
             review = review_form.save(commit=False)
@@ -315,7 +408,7 @@ def product_detail_page(request, product_id):
 
     return render(
         request,
-        "userside/product/product.html",
+        "userside/product/product.html", 
         {
             "product": product,
             "images": images,
@@ -328,6 +421,14 @@ def product_detail_page(request, product_id):
             "selected_variant": selected_variant,
         },
     )
+
+
+
+
+
+
+
+
 
 
 def delete_review(request, review_id):
